@@ -1,0 +1,24 @@
+h1 {
+  color: green;
+}
+
+body {
+  text-align: center;
+  margin: auto;
+  font-family: Inter;
+  font-size: 14px;
+  letter-spacing: 0;
+  line-height: 24px;
+}
+
+.app-container {
+  height: 100vh;
+  // background: linear-gradient(180deg, #22232c 0%, #05060f 100%);
+  background-color: #e3e3e3;
+  overflow-y: scroll;
+  padding: 2rem 2rem;
+}
+
+.mui-form-fields {
+  color: #ffffff;
+}

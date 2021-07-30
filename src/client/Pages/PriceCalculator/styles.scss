@@ -1,0 +1,107 @@
+.instances-container {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 16px;
+}
+
+.bought-header {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px;
+
+  button {
+    height: 20px;
+    width: 20px;
+  }
+}
+.buy-ledger {
+  display: flex;
+
+  .price {
+    margin: 0 8px;
+  }
+
+  .quantity {
+    margin: 0 8px;
+  }
+
+  .total {
+    padding-top: 31px;
+    width: 100px;
+  }
+  .multiply {
+    padding-top: 31px;
+  }
+}
+
+.suggested-sell-price-profit {
+  font-size: 32px;
+  padding: 16px 0;
+  color: green;
+}
+
+.suggested-sell-price-loss {
+  font-size: 32px;
+  padding: 16px 0;
+  color: red;
+}
+
+.expected-total {
+  font-size: 16px;
+  padding-left: 8px;
+  padding-top: 4px;
+  float: right;
+}
+
+.profit-target {
+  position: absolute;
+  bottom: 0;
+  padding-left: 8px;
+}
+
+.percentage-profits {
+  .MuiButtonGroup-grouped {
+    min-width: 25px;
+    padding: 5px 10px;
+  }
+
+  .active {
+    background-color: #3f51b5;
+    color: #ffffff;
+  }
+}
+
+.instance-container {
+  height: 500px;
+  width: 250px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  padding: 16px 8px;
+  position: relative;
+  margin: 8px 16px;
+}
+
+.new-ticker-entry {
+  height: 500px;
+  width: 250px;
+  border-radius: 8px;
+  background-color: #d3d3d3;
+  padding: 16px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 16px;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  .MuiSvgIcon-root {
+    height: 64px;
+    width: 64px;
+  }
+}
+
+.manual-profit {
+  padding-bottom: 8px;
+}
