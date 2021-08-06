@@ -151,7 +151,6 @@ const withOHLCData = (dataSet = "DAILY") => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                border: "1px dashed",
                 height: "100%",
               }}
             >
@@ -290,7 +289,7 @@ class StockChart extends React.Component {
           />
         </Chart>
         <Chart id={3} height={chartHeight} yExtents={this.candleChartExtents}>
-          <XAxis showGridLines showTicks={false} showTickLabel={false} />
+          <XAxis showGridLines gridLinesStrokeStyle="#e0e3eb" />
           <YAxis showGridLines tickFormat={this.pricesDisplayFormat} />
           <CandlestickSeries />
           <VolumeProfileSeries />
@@ -345,7 +344,7 @@ class StockChart extends React.Component {
           <ZoomButtons />
           <OHLCTooltip origin={[8, 16]} />
         </Chart>
-        <Chart
+        {/* <Chart
           id={4}
           height={elderRayHeight}
           yExtents={[0, elder.accessor()]}
@@ -373,7 +372,7 @@ class StockChart extends React.Component {
             }
             origin={[8, 16]}
           />
-        </Chart>
+        </Chart> */}
         <CrossHairCursor />
       </ChartCanvas>
     );

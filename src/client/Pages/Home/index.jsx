@@ -24,6 +24,7 @@ const useStyles = makeStyles({
     margin: "12px",
     height: "560px",
     width: "1000px",
+    backgroundColor: 'white'
   },
 });
 
@@ -41,10 +42,11 @@ const Home = () => {
     <>
       <div className={classes.container}>
         <div className={classes.flex}>
+        <HistoryWidget onGapperItemClick={onGapperItemClick} />
           <div className={classes.chartContainer}>
             <Chart date={date} ticker={ticker} />
           </div>
-          <HistoryWidget onGapperItemClick={onGapperItemClick} />
+          
         </div>
       </div>
       {/* <div className={classes.notificationWidgetContainer}>

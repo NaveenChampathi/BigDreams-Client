@@ -12,6 +12,7 @@ import Typography from "@material-ui/core/Typography";
 import { IconButton } from "@material-ui/core";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import NotificationWidget from "client/Pages/Home/Components/NotificationWidget";
+import logo from "client/images/logo.png";
 import "./app.scss";
 
 const useStyles = makeStyles((theme) => ({
@@ -36,10 +37,15 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     right: 0,
     top: 45,
-    visibility: 'hidden'
+    visibility: 'hidden',
+    zIndex: 99
   },
   showNotifications: {
     visibility: 'visible'
+  },
+  appContainer: {
+    height: '100%',
+    backgroundColor: '#e9ecff'
   }
 }));
 
@@ -93,9 +99,12 @@ const App = () => {
 
   return (
     <Router basename="/#/">
-      <div>
+      <div className={classes.appContainer}>
         <AppBar className={classes.appBar} position="static">
           <Toolbar>
+          <div>
+            <img style={{height: '75px'}} src={logo} />
+          </div>
             <Typography variant="h6" className={classes.title}></Typography>
             <Button color="inherit">
               <Link className={classes.link} to="/home">

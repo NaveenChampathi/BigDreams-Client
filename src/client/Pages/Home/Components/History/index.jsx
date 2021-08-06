@@ -3,12 +3,17 @@ import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import { getHighVolumeDailyBars } from "client/apis/historyApi";
-import { getFundamentalsFinviz } from "client/apis/fundamentalsApi";
+import {
+  getFundamentalsFinviz,
+  getBamsecFilings,
+} from "client/apis/fundamentalsApi";
 import { numberWithCommas } from "client/utils";
+
+const BAMSEC_ROOT = "https://www.bamsec.com";
 
 const useStyles = makeStyles({
   displayFlex: {
-    display: 'flex'
+    display: "flex",
   },
   flexContainer: {
     flex: 1,
@@ -24,7 +29,7 @@ const useStyles = makeStyles({
     padding: "2px 3px",
   },
   label: {
-    color: "gray",
+    color: "#676767",
     fontSize: "12px",
   },
   value: {
@@ -36,15 +41,14 @@ const useStyles = makeStyles({
   },
   gapperItemContainer: {
     display: "flex",
-    cursor: "pointer"
+    cursor: "pointer",
   },
   gapperItemHeaderContainer: {
     display: "flex",
-    backgroundColor: "#f3f3f3",
   },
   gapperItemDataContainer: {
-    overflow: 'auto',
-    maxHeight: '400px'
+    overflow: "auto",
+    maxHeight: "400px",
   },
   itemField: {
     width: "80px",
@@ -61,14 +65,28 @@ const useStyles = makeStyles({
     backgroundColor: "#da7878",
   },
   newsDateContainer: {
-    width: '145px',
-    textAlign: 'right'
+    width: "145px",
+    textAlign: "right",
   },
   newsContainer: {
     flex: 1,
-    textAlign: 'left',
-    paddingLeft: '12px'
-  }
+    textAlign: "left",
+    paddingLeft: "12px",
+  },
+  filingsContainer: {
+    margin: "8px 6px",
+    flex: 1,
+  },
+  filingsItemContainer: {
+    display: "flex",
+    textDecoration: "none",
+    color: 'black',
+    margin: '0 8px',
+    borderBottom: "1px solid #bdbdbd"
+  },
+  filingTitle: {
+    flex: 1,
+  },
 });
 
 const processData = (data) => {
@@ -109,9 +127,10 @@ const processData = (data) => {
   return results;
 };
 
-const Widget = ({onGapperItemClick}) => {
+const Widget = ({ onGapperItemClick }) => {
   const [dailyBars, setDailyBars] = useState([]);
-  const [fundamentals, setFundamentals] = useState({ averageData: {}});
+  const [fundamentals, setFundamentals] = useState({ averageData: {} });
+  const [filings, setFilings] = useState({data: {}});
   const [averageData, setAverageData] = useState({});
   const [ticker, setTicker] = useState("");
 
@@ -125,10 +144,20 @@ const Widget = ({onGapperItemClick}) => {
       getFundamentalsFinviz(ticker).then((data) => {
         setFundamentals(data.data);
       });
+      getBamsecFilings(ticker).then((data) => {
+        setFilings(data);
+      });
     }
   };
 
   const classes = useStyles();
+
+  const {
+    financialFilingsResults,
+    newsFilingsResults,
+    registrationsFilingsResults,
+    otherFilingsResults,
+  } = filings.data;
 
   return (
     <div className={classes.flexContainer}>
@@ -175,11 +204,13 @@ const Widget = ({onGapperItemClick}) => {
           </div>
           <div className={classes.item}>
             <div className={classes.label}>Avg. Mo. Push</div>
-            <div className={classes.value}>{averageData.avgMorningPush || "-"}</div>
+            <div className={classes.value}>
+              {averageData.avgMorningPush || "-"}
+            </div>
           </div>
           <div className={classes.item}>
             <div className={classes.label}>Avg. Range</div>
-            <div className={classes.value}>{averageData.avgRange  || "-"}</div>
+            <div className={classes.value}>{averageData.avgRange || "-"}</div>
           </div>
         </div>
       </Paper>
@@ -198,38 +229,34 @@ const Widget = ({onGapperItemClick}) => {
             <div className={classes.itemField}>Volume</div>
           </div>
           <div className={classes.gapperItemDataContainer}>
-          {dailyBars.map((d) => (
-            <div
-              className={`${classes.gapperItemContainer} ${
-                d.OpenPrice - d.ClosePrice > 0 ? classes.redBG : classes.greenBG
-              }`}
-              onClick={() => onGapperItemClick(d.Timestamp.split("T")[0], ticker)}
-            >
-              <div className={classes.itemField}>
-                {d.Timestamp.split("T")[0]}
-              </div>
-              <div className={classes.itemField}>
-                {d.PreviousClose
-                  ? d.gap
-                  : "-"}
-                %
-              </div>
-              <div className={classes.itemField}>
-                {d.morningPush}
-                %
-              </div>
-              <div className={classes.itemField}>
-                {d.range}%
-              </div>
-              <div className={classes.itemField}>{d.PreviousClose}</div>
+            {dailyBars.map((d) => (
               <div
-                className={classes.itemFieldExtraWide}
-              >{`${d.OpenPrice} | ${d.HighPrice} | ${d.LowPrice} | ${d.ClosePrice}`}</div>
-              <div className={classes.itemField}>
-                {numberWithCommas(d.Volume)}
+                className={`${classes.gapperItemContainer} ${
+                  d.OpenPrice - d.ClosePrice > 0
+                    ? classes.redBG
+                    : classes.greenBG
+                }`}
+                onClick={() =>
+                  onGapperItemClick(d.Timestamp.split("T")[0], ticker)
+                }
+              >
+                <div className={classes.itemField}>
+                  {d.Timestamp.split("T")[0]}
+                </div>
+                <div className={classes.itemField}>
+                  {d.PreviousClose ? d.gap : "-"}%
+                </div>
+                <div className={classes.itemField}>{d.morningPush}%</div>
+                <div className={classes.itemField}>{d.range}%</div>
+                <div className={classes.itemField}>{d.PreviousClose}</div>
+                <div
+                  className={classes.itemFieldExtraWide}
+                >{`${d.OpenPrice} | ${d.HighPrice} | ${d.LowPrice} | ${d.ClosePrice}`}</div>
+                <div className={classes.itemField}>
+                  {numberWithCommas(d.Volume)}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           </div>
         </div>
       </Paper>
@@ -237,16 +264,93 @@ const Widget = ({onGapperItemClick}) => {
       {/* News */}
       <Paper variant="outlined" className={classes.margin}>
         <div className={classes.gappersContainer}>
-          <div className={classes.gapperItemDataContainer}>
-          {
-            fundamentals.news && fundamentals.news.map(({date, news}) => <div className={classes.displayFlex}>
-              <div className={classes.newsDateContainer}>{date}</div>
-              <div className={classes.newsContainer}>{news}</div>
-            </div>)
-          }
+          <div className={classes.newsDataContainer}>
+            {fundamentals.news &&
+              fundamentals.news.map(({ date, news }) => (
+                <div className={classes.displayFlex}>
+                  <div className={classes.newsDateContainer}>{date}</div>
+                  <div className={classes.newsContainer}>{news}</div>
+                </div>
+              ))}
           </div>
         </div>
       </Paper>
+      <div className={classes.displayFlex}>
+        {/* Filings */}
+        {financialFilingsResults && (
+          <Paper variant="outlined" className={classes.filingsContainer}>
+              {financialFilingsResults.map(
+                ({ filingType, filingDate, filingUrl, title }) => (
+                  <a
+                    target="_blank"
+                    href={`${BAMSEC_ROOT}${filingUrl}`}
+                    className={classes.filingsItemContainer}
+                  >
+                    <div>{filingType}</div>
+                    <div className={classes.filingTitle}>{title}</div>
+                    <div>{filingDate}</div>
+                  </a>
+                )
+              )}
+          </Paper>
+        )}
+
+        {/* registration */}
+        {registrationsFilingsResults && (
+          <Paper variant="outlined" className={classes.filingsContainer}>
+              {registrationsFilingsResults.map(
+                ({ filingType, filingDate, filingUrl, title }) => (
+                  <a
+                    target="_blank"
+                    href={`${BAMSEC_ROOT}${filingUrl}`}
+                    className={classes.filingsItemContainer}
+                  >
+                    <div>{filingType}</div>
+                    <div className={classes.filingTitle}>{title}</div>
+                    <div>{filingDate}</div>
+                  </a>
+                )
+              )}
+          </Paper>
+        )}
+
+        {/* Other */}
+        {otherFilingsResults && (
+          <Paper variant="outlined" className={classes.filingsContainer}>
+              {otherFilingsResults.map(
+                ({ filingType, filingDate, filingUrl, title }) => (
+                  <a
+                    target="_blank"
+                    href={`${BAMSEC_ROOT}${filingUrl}`}
+                    className={classes.filingsItemContainer}
+                  >
+                    <div>{filingType}</div>
+                    <div className={classes.filingTitle}>{title}</div>
+                    <div>{filingDate}</div>
+                  </a>
+                )
+              )}
+          </Paper>
+        )}
+        {/* Other */}
+        {newsFilingsResults && (
+          <Paper variant="outlined" className={classes.filingsContainer}>
+              {newsFilingsResults.map(
+                ({ filingType, filingDate, filingUrl, title }) => (
+                  <a
+                    target="_blank"
+                    href={`${BAMSEC_ROOT}${filingUrl}`}
+                    className={classes.filingsItemContainer}
+                  >
+                    <div>{filingType}</div>
+                    <div className={classes.filingTitle}>{title}</div>
+                    <div>{filingDate}</div>
+                  </a>
+                )
+              )}
+          </Paper>
+        )}
+      </div>
     </div>
   );
 };
