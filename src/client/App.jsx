@@ -97,6 +97,10 @@ const App = () => {
     setShowNotifications(!showNotifications);
   };
 
+  const handleClickAway = () => {
+    setShowNotifications(false);
+  }
+
   return (
     <Router basename="/#/">
       <div className={classes.appContainer}>
@@ -127,13 +131,13 @@ const App = () => {
               onClick={toggleNotifications}
             >
               <NotificationsIcon />
+              
               <div>
                 <div
                   className={`${classes.notificationContainer} ${
                     showNotifications ? classes.showNotifications : ""
                   }`}
-                >
-                  <NotificationWidget />
+                ><NotificationWidget />
                 </div>
               </div>
             </IconButton>

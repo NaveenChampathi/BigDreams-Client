@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Paper from '@material-ui/core/Paper';
 import { connectedSocket } from "client/socket";
 import { getNasdaqHalts } from "client/apis/haltsApi";
-import { playPristine, playSwipe, playFlush } from "client/sounds/play";
+import { playPristine, playSwipe, playFlush, playSwiftly } from "client/sounds/play";
 import "./styles.scss";
 
 let halts = [];
@@ -35,24 +35,28 @@ const Widget = () => {
     }
 
     const handleNotifications = (_halts) => {
-        if(halts.length !== _halts.length) {
-            const _notifications = [];
-            for(let i = 0; i < _halts.length; i++) {
-                const { ticker, haltDate, haltTime, resumptionDate, resumptionTime, reasonCode } = _halts[i];
-                const message = `${ticker} (${reasonCode}) halted ${haltDate} ${haltTime} and resumes ${resumptionDate} ${resumptionTime}`;
-                if(notificationStateRef.current.indexOf(message) === -1) {
-                    halts.push(_halts[i]);
-                    _notifications.push(message);
-                } else {
-                    break;
+        setNotifications((previousNotificationsState) => {
+            if(previousNotificationsState.length !== _halts.length) {
+                const _notifications = [];
+                for(let i = 0; i < _halts.length; i++) {
+                    const { ticker, haltDate, haltTime, resumptionDate, resumptionTime, reasonCode } = _halts[i];
+                    const message = `${ticker} (${reasonCode}) halted ${haltDate} ${haltTime} and resumes ${resumptionDate} ${resumptionTime}`;
+                    if(previousNotificationsState.indexOf(message) === -1) {
+                        // halts.push(_halts[i]);
+                        _notifications.push(message);
+                    } else {
+                        break;
+                    }
+                }
+    
+                if(_notifications.length) {
+                    playPristine();
+                    return [..._notifications, ...previousNotificationsState]
                 }
             }
-
-            if(_notifications.length) {
-                setNotifications([..._notifications, ...notificationStateRef.current]);
-                playPristine();
-            }
-        }
+            return previousNotificationsState;
+        })
+        
     };
 
     useEffect(() => {
@@ -65,6 +69,10 @@ const Widget = () => {
               } else {
                 playFlush();
               }
+        });
+        socket.on("AlertHOD", ({symbol}) => {
+            updateMessageNotifications(symbol + ' near HOD');
+            playSwiftly();
         });
 
         // Start Nasdaq RSS

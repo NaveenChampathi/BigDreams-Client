@@ -16,15 +16,15 @@ const useStyles = makeStyles({
     marginRight: "12px",
   },
   notificationWidgetContainer: {
-      maxWidth: "516px",
-      margin: "0 12px"
+    maxHeight: "800px",
+    margin: "12px 0",
   },
   chartContainer: {
     textAlign: "initial",
     margin: "12px",
     height: "560px",
     width: "1000px",
-    backgroundColor: 'white'
+    backgroundColor: "white",
   },
 });
 
@@ -42,16 +42,15 @@ const Home = () => {
     <>
       <div className={classes.container}>
         <div className={classes.flex}>
-        <HistoryWidget onGapperItemClick={onGapperItemClick} />
+          <HistoryWidget onGapperItemClick={onGapperItemClick} />
           <div className={classes.chartContainer}>
             <Chart date={date} ticker={ticker} />
+            <div className={classes.notificationWidgetContainer}>
+              <NotificationWidget />
+            </div>
           </div>
-          
         </div>
       </div>
-      {/* <div className={classes.notificationWidgetContainer}>
-        <NotificationWidget />
-      </div> */}
     </>
   );
 };
