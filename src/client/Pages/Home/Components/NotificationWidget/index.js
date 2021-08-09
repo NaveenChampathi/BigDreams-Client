@@ -8,6 +8,13 @@ import "./styles.scss";
 
 let halts = [];
 
+const getTimeFromTimestamp = (timestamp) => {
+    let timestampDate = new Date(timestamp);
+    let timestampDateString = timestampDate.getHours() + 1 + ":" + (timestampDate.getMinutes() < 10 ? "0" + timestampDate.getMinutes() : timestampDate.getMinutes()) + ":" + (timestampDate.getSeconds() < 10 ? "0" + timestampDate.getSeconds() : timestampDate.getSeconds());
+
+    return timestampDateString;
+}
+
 const useStyles = makeStyles({
     container: {
         padding: '8px 16px',
@@ -36,42 +43,42 @@ const Widget = () => {
 
     const handleNotifications = (_halts) => {
         setNotifications((previousNotificationsState) => {
-            if(previousNotificationsState.length !== _halts.length) {
+            if (previousNotificationsState.length !== _halts.length) {
                 const _notifications = [];
-                for(let i = 0; i < _halts.length; i++) {
+                for (let i = 0; i < _halts.length; i++) {
                     const { ticker, haltDate, haltTime, resumptionDate, resumptionTime, reasonCode } = _halts[i];
                     const message = `${ticker} (${reasonCode}) halted ${haltDate} ${haltTime} and resumes ${resumptionDate} ${resumptionTime}`;
-                    if(previousNotificationsState.indexOf(message) === -1) {
+                    if (previousNotificationsState.indexOf(message) === -1) {
                         // halts.push(_halts[i]);
                         _notifications.push(message);
                     } else {
                         break;
                     }
                 }
-    
-                if(_notifications.length) {
+
+                if (_notifications.length) {
                     playPristine();
                     return [..._notifications, ...previousNotificationsState]
                 }
             }
             return previousNotificationsState;
         })
-        
+
     };
 
     useEffect(() => {
         const socket = connectedSocket();
         socket.on('Halts', handleNotifications);
-        socket.on("Alert", ({swipe, message}) => {
+        socket.on("Alert", ({ swipe, message }) => {
             updateMessageNotifications(message);
             if (swipe) {
                 playSwipe();
-              } else {
+            } else {
                 playFlush();
-              }
+            }
         });
-        socket.on("AlertHOD", ({symbol}) => {
-            updateMessageNotifications(symbol + ' near HOD');
+        socket.on("AlertHOD", ({ symbol, lastNotified, now }) => {
+            updateMessageNotifications(lastNotified ? `${getTimeFromTimestamp(now)} | ${symbol} near HOD. Last notified ${getTimeFromTimestamp(lastNotified)}` : `${dateString} | ${symbol} near HOD.`);
             playSwiftly();
         });
 
@@ -86,7 +93,7 @@ const Widget = () => {
                 notifications.map((message, i) => <div key={i} className={classes.item}>{message}</div>)
             }
         </div>
-        </Paper></div>
+    </Paper></div>
 };
 
 export default Widget;
