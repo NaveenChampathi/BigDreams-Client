@@ -60,9 +60,15 @@ const useStyles = makeStyles({
   },
   greenBG: {
     backgroundColor: "#a3e4a5",
+    '&:hover': {
+      backgroundColor: '#587d59'
+    }
   },
   redBG: {
     backgroundColor: "#da7878",
+    '&:hover': {
+      backgroundColor: '#884e4e'
+    }
   },
   newsDateContainer: {
     width: "145px",
@@ -266,10 +272,10 @@ const Widget = ({ onGapperItemClick }) => {
         <div className={classes.gappersContainer}>
           <div className={classes.newsDataContainer}>
             {fundamentals.news &&
-              fundamentals.news.map(({ date, news }) => (
+              fundamentals.news.map(({ date, news, url }) => (
                 <div className={classes.displayFlex}>
                   <div className={classes.newsDateContainer}>{date}</div>
-                  <div className={classes.newsContainer}>{news}</div>
+                  <div className={classes.newsContainer}><a href={url} target="_blank">{news}</a></div>
                 </div>
               ))}
           </div>

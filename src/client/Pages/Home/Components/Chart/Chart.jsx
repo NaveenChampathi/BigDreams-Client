@@ -85,6 +85,7 @@ const withOHLCData = (dataSet = "DAILY") => {
                 low: d.LowPrice,
                 close: d.ClosePrice,
                 volume: d.Volume,
+                vwap: d.vw
               })),
             });
           })
@@ -137,7 +138,7 @@ const withOHLCData = (dataSet = "DAILY") => {
         const { date, ticker } = this.props;
         const { date: prevDate, ticker: prevTicker } = prevProps;
 
-        if (date !== prevDate) {
+        if ((date !== prevDate) || (ticker !== prevTicker)) {
           this.fetchIntradayData(date, ticker);
         }
       }

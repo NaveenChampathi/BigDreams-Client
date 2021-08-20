@@ -16,7 +16,7 @@ const useStyles = makeStyles({
     marginRight: "12px",
   },
   notificationWidgetContainer: {
-    maxHeight: "800px",
+    maxHeight: "350px",
     margin: "12px 0",
   },
   chartContainer: {

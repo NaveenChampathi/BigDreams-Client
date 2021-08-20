@@ -51,10 +51,10 @@ export const backTest = ({ minPremarketVolume,
 
     data.forEach(entry => {
 
-        if(initialBalance < 25000) {
-            console.log('Cannot trade no More');
-            return;
-        }
+        // if(initialBalance < 25000) {
+        //     console.log('Cannot trade no More');
+        //     return;
+        // }
 
         if (conditionsMet(entry)) {
             totalNumberOfTradesTaken++;
