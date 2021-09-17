@@ -1,7 +1,7 @@
 import React, { Component, useState, useEffect, useRef } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
-import { Badge } from '@material-ui/core';
+import { Badge } from "@material-ui/core";
 import { connectedSocket } from "client/socket";
 import { getNasdaqHalts } from "client/apis/haltsApi";
 import {
@@ -53,37 +53,43 @@ const useStyles = makeStyles({
     borderBottom: "1px solid #e0e0e0",
     fontSize: "14px",
     lineHeight: "24px",
-    display: 'flex',
-    alignItems: 'center'
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
   },
   notificationCount: {
-      marginRight: '18px'
-  }
+    marginRight: "18px",
+  },
 });
 
-const Widget = () => {
+const Widget = ({ onAlertClick }) => {
   const [notifications, setNotifications] = useState([]);
   const [secondaryNotifications, setSecondaryNotifications] = useState([]);
   const notificationStateRef = useRef();
 
   notificationStateRef.current = notifications;
 
-  const updateMessageNotifications = (message) => {
+  const updateMessageNotifications = (message, symbol) => {
     const _notifications = [...notificationStateRef.current];
-    setNotifications([message, ..._notifications]);
+    setNotifications([{ message, ticker: symbol }, ..._notifications]);
   };
 
-  const updateSecondaryMessageNotifications = ({message, count, symbol}) => {
-    setSecondaryNotifications((prevState => {
-      const _filteredArray = prevState.filter(entry => entry.symbol !== symbol);
-      return  [{message, count, symbol}, ..._filteredArray ];
-    }));
+  const updateSecondaryMessageNotifications = ({ message, count, symbol }) => {
+    setSecondaryNotifications((prevState) => {
+      const _filteredArray = prevState.filter(
+        (entry) => entry.symbol !== symbol
+      );
+      return [{ message, count, symbol }, ..._filteredArray];
+    });
   };
 
   const handleNotifications = (_halts) => {
     setNotifications((previousNotificationsState) => {
       if (previousNotificationsState.length !== _halts.length) {
         const _notifications = [];
+        const _previousNotificationMessages = previousNotificationsState.map(
+          (p) => p.message
+        );
         for (let i = 0; i < _halts.length; i++) {
           const {
             ticker,
@@ -94,9 +100,9 @@ const Widget = () => {
             reasonCode,
           } = _halts[i];
           const message = `${ticker} (${reasonCode}) halted ${haltDate} ${haltTime} and resumes ${resumptionDate} ${resumptionTime}`;
-          if (previousNotificationsState.indexOf(message) === -1) {
+          if (_previousNotificationMessages.indexOf(message) === -1) {
             // halts.push(_halts[i]);
-            _notifications.push(message);
+            _notifications.push({ message, ticker });
           } else {
             break;
           }
@@ -114,8 +120,8 @@ const Widget = () => {
   useEffect(() => {
     const socket = connectedSocket();
     socket.on("Halts", handleNotifications);
-    socket.on("Alert", ({ swipe, message }) => {
-      updateMessageNotifications(message);
+    socket.on("Alert", ({ swipe, message, symbol }) => {
+      updateMessageNotifications(message, symbol);
       if (swipe) {
         playSwipe();
       } else {
@@ -123,7 +129,7 @@ const Widget = () => {
       }
     });
     socket.on("AlertHOD", ({ symbol, lastNotified, now, count }) => {
-        updateSecondaryMessageNotifications({
+      updateSecondaryMessageNotifications({
         message: lastNotified
           ? `${getTimeFromTimestamp(
               now
@@ -131,14 +137,13 @@ const Widget = () => {
               lastNotified
             )}`
           : `${getTimeFromTimestamp(now)} | ${symbol} near HOD.`,
-          count,
-          symbol
+        count,
+        symbol,
       });
 
-      if(count > 2) {
+      if (count > 2) {
         // playSwiftly();
       }
-      
     });
 
     // Start Nasdaq RSS
@@ -151,16 +156,33 @@ const Widget = () => {
       <Paper variant="outlined">
         <div className={classes.container}>
           <div className={classes.primaryContainer}>
-            {notifications.map((message, i) => (
-              <div key={i} className={classes.item}>
+            {notifications.map(({ message, ticker }, i) => (
+              <div
+                key={i}
+                className={classes.item}
+                onClick={() =>
+                  onAlertClick(new Date().toISOString().split("T")[0], ticker)
+                }
+              >
                 {message}
               </div>
             ))}
           </div>
           <div className={classes.secondaryContainer}>
-            {secondaryNotifications.map(({message, count}, i) => (
-              <div key={i} className={classes.item}>
-                <Badge badgeContent={count} color={`${count > 4 ? 'secondary' : 'primary'}`} className={classes.notificationCount} ></Badge> {message}
+            {secondaryNotifications.map(({ message, count, symbol }, i) => (
+              <div
+                key={i}
+                className={classes.item}
+                onClick={() =>
+                  onAlertClick(new Date().toISOString().split("T")[0], symbol)
+                }
+              >
+                <Badge
+                  badgeContent={count}
+                  color={`${count > 4 ? "secondary" : "primary"}`}
+                  className={classes.notificationCount}
+                ></Badge>{" "}
+                {message}
               </div>
             ))}
           </div>

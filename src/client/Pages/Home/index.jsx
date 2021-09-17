@@ -46,7 +46,7 @@ const Home = () => {
           <div className={classes.chartContainer}>
             <Chart date={date} ticker={ticker} />
             <div className={classes.notificationWidgetContainer}>
-              <NotificationWidget />
+              <NotificationWidget onAlertClick={onGapperItemClick} />
             </div>
           </div>
         </div>

@@ -60,15 +60,15 @@ const useStyles = makeStyles({
   },
   greenBG: {
     backgroundColor: "#a3e4a5",
-    '&:hover': {
-      backgroundColor: '#587d59'
-    }
+    "&:hover": {
+      backgroundColor: "#587d59",
+    },
   },
   redBG: {
     backgroundColor: "#da7878",
-    '&:hover': {
-      backgroundColor: '#884e4e'
-    }
+    "&:hover": {
+      backgroundColor: "#884e4e",
+    },
   },
   newsDateContainer: {
     width: "145px",
@@ -86,9 +86,9 @@ const useStyles = makeStyles({
   filingsItemContainer: {
     display: "flex",
     textDecoration: "none",
-    color: 'black',
-    margin: '0 8px',
-    borderBottom: "1px solid #bdbdbd"
+    color: "black",
+    margin: "0 8px",
+    borderBottom: "1px solid #bdbdbd",
   },
   filingTitle: {
     flex: 1,
@@ -136,7 +136,7 @@ const processData = (data) => {
 const Widget = ({ onGapperItemClick }) => {
   const [dailyBars, setDailyBars] = useState([]);
   const [fundamentals, setFundamentals] = useState({ averageData: {} });
-  const [filings, setFilings] = useState({data: {}});
+  const [filings, setFilings] = useState({ data: {} });
   const [averageData, setAverageData] = useState({});
   const [ticker, setTicker] = useState("");
 
@@ -147,12 +147,20 @@ const Widget = ({ onGapperItemClick }) => {
         setDailyBars(dailyData);
         setAverageData(averageData);
       });
-      getFundamentalsFinviz(ticker).then((data) => {
-        setFundamentals(data.data);
-      });
-      getBamsecFilings(ticker).then((data) => {
-        setFilings(data);
-      });
+      getFundamentalsFinviz(ticker)
+        .then((data) => {
+          setFundamentals(data.data);
+        })
+        .catch((err) => {
+          setFundamentals({ averageData: {} });
+        });
+      getBamsecFilings(ticker)
+        .then((data) => {
+          setFilings(data);
+        })
+        .catch((err) => {
+          setFilings({ data: {} });
+        });
     }
   };
 
@@ -275,7 +283,11 @@ const Widget = ({ onGapperItemClick }) => {
               fundamentals.news.map(({ date, news, url }) => (
                 <div className={classes.displayFlex}>
                   <div className={classes.newsDateContainer}>{date}</div>
-                  <div className={classes.newsContainer}><a href={url} target="_blank">{news}</a></div>
+                  <div className={classes.newsContainer}>
+                    <a href={url} target="_blank">
+                      {news}
+                    </a>
+                  </div>
                 </div>
               ))}
           </div>
@@ -285,75 +297,75 @@ const Widget = ({ onGapperItemClick }) => {
         {/* Filings */}
         {financialFilingsResults && (
           <Paper variant="outlined" className={classes.filingsContainer}>
-              {financialFilingsResults.map(
-                ({ filingType, filingDate, filingUrl, title }) => (
-                  <a
-                    target="_blank"
-                    href={`${BAMSEC_ROOT}${filingUrl}`}
-                    className={classes.filingsItemContainer}
-                  >
-                    <div>{filingType}</div>
-                    <div className={classes.filingTitle}>{title}</div>
-                    <div>{filingDate}</div>
-                  </a>
-                )
-              )}
+            {financialFilingsResults.map(
+              ({ filingType, filingDate, filingUrl, title }) => (
+                <a
+                  target="_blank"
+                  href={`${BAMSEC_ROOT}${filingUrl}`}
+                  className={classes.filingsItemContainer}
+                >
+                  <div>{filingType}</div>
+                  <div className={classes.filingTitle}>{title}</div>
+                  <div>{filingDate}</div>
+                </a>
+              )
+            )}
           </Paper>
         )}
 
         {/* registration */}
         {registrationsFilingsResults && (
           <Paper variant="outlined" className={classes.filingsContainer}>
-              {registrationsFilingsResults.map(
-                ({ filingType, filingDate, filingUrl, title }) => (
-                  <a
-                    target="_blank"
-                    href={`${BAMSEC_ROOT}${filingUrl}`}
-                    className={classes.filingsItemContainer}
-                  >
-                    <div>{filingType}</div>
-                    <div className={classes.filingTitle}>{title}</div>
-                    <div>{filingDate}</div>
-                  </a>
-                )
-              )}
+            {registrationsFilingsResults.map(
+              ({ filingType, filingDate, filingUrl, title }) => (
+                <a
+                  target="_blank"
+                  href={`${BAMSEC_ROOT}${filingUrl}`}
+                  className={classes.filingsItemContainer}
+                >
+                  <div>{filingType}</div>
+                  <div className={classes.filingTitle}>{title}</div>
+                  <div>{filingDate}</div>
+                </a>
+              )
+            )}
           </Paper>
         )}
 
         {/* Other */}
         {otherFilingsResults && (
           <Paper variant="outlined" className={classes.filingsContainer}>
-              {otherFilingsResults.map(
-                ({ filingType, filingDate, filingUrl, title }) => (
-                  <a
-                    target="_blank"
-                    href={`${BAMSEC_ROOT}${filingUrl}`}
-                    className={classes.filingsItemContainer}
-                  >
-                    <div>{filingType}</div>
-                    <div className={classes.filingTitle}>{title}</div>
-                    <div>{filingDate}</div>
-                  </a>
-                )
-              )}
+            {otherFilingsResults.map(
+              ({ filingType, filingDate, filingUrl, title }) => (
+                <a
+                  target="_blank"
+                  href={`${BAMSEC_ROOT}${filingUrl}`}
+                  className={classes.filingsItemContainer}
+                >
+                  <div>{filingType}</div>
+                  <div className={classes.filingTitle}>{title}</div>
+                  <div>{filingDate}</div>
+                </a>
+              )
+            )}
           </Paper>
         )}
         {/* Other */}
         {newsFilingsResults && (
           <Paper variant="outlined" className={classes.filingsContainer}>
-              {newsFilingsResults.map(
-                ({ filingType, filingDate, filingUrl, title }) => (
-                  <a
-                    target="_blank"
-                    href={`${BAMSEC_ROOT}${filingUrl}`}
-                    className={classes.filingsItemContainer}
-                  >
-                    <div>{filingType}</div>
-                    <div className={classes.filingTitle}>{title}</div>
-                    <div>{filingDate}</div>
-                  </a>
-                )
-              )}
+            {newsFilingsResults.map(
+              ({ filingType, filingDate, filingUrl, title }) => (
+                <a
+                  target="_blank"
+                  href={`${BAMSEC_ROOT}${filingUrl}`}
+                  className={classes.filingsItemContainer}
+                >
+                  <div>{filingType}</div>
+                  <div className={classes.filingTitle}>{title}</div>
+                  <div>{filingDate}</div>
+                </a>
+              )
+            )}
           </Paper>
         )}
       </div>

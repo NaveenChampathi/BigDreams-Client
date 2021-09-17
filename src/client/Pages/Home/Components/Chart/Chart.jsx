@@ -85,7 +85,7 @@ const withOHLCData = (dataSet = "DAILY") => {
                 low: d.LowPrice,
                 close: d.ClosePrice,
                 volume: d.Volume,
-                vwap: d.vw
+                vwap: d.vw,
               })),
             });
           })
@@ -138,7 +138,7 @@ const withOHLCData = (dataSet = "DAILY") => {
         const { date, ticker } = this.props;
         const { date: prevDate, ticker: prevTicker } = prevProps;
 
-        if ((date !== prevDate) || (ticker !== prevTicker)) {
+        if (date !== prevDate || ticker !== prevTicker) {
           this.fetchIntradayData(date, ticker);
         }
       }
@@ -162,14 +162,14 @@ const withOHLCData = (dataSet = "DAILY") => {
 
         return (
           <div>
-            <div style={{textAlign: 'right'}}>
-            <IconButton
-              color="inherit"
-              aria-label="refresh"
-              onClick={this.refreshData.bind(this)}
-            >
-              <RefreshIcon />
-            </IconButton>
+            <div style={{ textAlign: "right" }}>
+              <IconButton
+                color="inherit"
+                aria-label="refresh"
+                onClick={this.refreshData.bind(this)}
+              >
+                <RefreshIcon />
+              </IconButton>
             </div>
             <div>
               <OriginalComponent {...this.props} data={data} />
@@ -241,9 +241,9 @@ class StockChart extends React.Component {
     const getMarketOpenTime = () => {
       let openMarketTimeIndex = 299;
 
-      if(data.length) {
-        for(let i = 0; i < data.length; i++) {
-          if(data[i].timestamp.includes('T09:30')) {
+      if (data.length) {
+        for (let i = 0; i < data.length; i++) {
+          if (data[i].timestamp.includes("T09:30")) {
             openMarketTimeIndex = i;
             break;
           }
@@ -294,7 +294,7 @@ class StockChart extends React.Component {
           <YAxis showGridLines tickFormat={this.pricesDisplayFormat} />
           <CandlestickSeries />
           <VolumeProfileSeries />
-          <LineSeries yAccessor={(d) => d.close} />
+          {/* <LineSeries yAccessor={(d) => d.close} /> */}
           {/* <LineSeries
             yAccessor={ema26.accessor()}
             strokeStyle={ema26.stroke()}
@@ -315,6 +315,7 @@ class StockChart extends React.Component {
             rectWidth={margin.right}
             displayFormat={this.pricesDisplayFormat}
           />
+          <MouseCoordinateX displayFormat={timeDisplayFormat} />
           <EdgeIndicator
             itemType="last"
             rectWidth={margin.right}
@@ -323,7 +324,12 @@ class StockChart extends React.Component {
             displayFormat={this.pricesDisplayFormat}
             yAccessor={this.yEdgeIndicator}
           />
-          <StraightLine type="vertical" xValue={getMarketOpenTime()} />
+          <StraightLine
+            type="vertical"
+            lineDash={"LongDash"}
+            xValue={getMarketOpenTime()}
+            lineWidth={2}
+          />
           {/* <MovingAverageTooltip
             origin={[8, 24]}
             options={[
