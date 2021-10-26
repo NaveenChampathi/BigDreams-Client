@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import NotificationWidget from "client/Pages/Home/Components/NotificationWidget";
 import HistoryWidget from "client/Pages/Home/Components/History";
 import Chart from "client/Pages/Home/Components/Chart/index";
+import DailyChart from "client/Pages/Home/Components/Chart/DailyChart";
 import "./styles.scss";
 
 const useStyles = makeStyles({
@@ -18,13 +19,20 @@ const useStyles = makeStyles({
   notificationWidgetContainer: {
     maxHeight: "350px",
     margin: "12px 0",
+    width: 1000,
   },
   chartContainer: {
     textAlign: "initial",
     margin: "12px",
     height: "560px",
-    width: "1000px",
+    flex: 1,
     backgroundColor: "white",
+  },
+  dailyChartContainer: {
+    textAlign: "initial",
+    margin: "12px",
+    backgroundColor: "white",
+    flex: 1,
   },
 });
 
@@ -44,9 +52,15 @@ const Home = () => {
         <div className={classes.flex}>
           <HistoryWidget onGapperItemClick={onGapperItemClick} />
           <div className={classes.chartContainer}>
+            $
             <Chart date={date} ticker={ticker} />
-            <div className={classes.notificationWidgetContainer}>
-              <NotificationWidget onAlertClick={onGapperItemClick} />
+            <div className={classes.flex}>
+              <div className={classes.dailyChartContainer}>
+                <DailyChart date={date} ticker={ticker} />
+              </div>
+              <div className={classes.notificationWidgetContainer}>
+                <NotificationWidget onAlertClick={onGapperItemClick} />
+              </div>
             </div>
           </div>
         </div>

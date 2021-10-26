@@ -3,6 +3,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 // import StocksTable from "client/Pages/StocksTable";
 import BackTesting from "client/Pages/BackTesting";
+import HaltResume from "client/Pages/HaltResume";
+import Statistics from "client/Pages/Stats";
 import TickerHistory from "client/Pages/TickerHistory";
 import Home from "client/Pages/Home";
 import Button from "@material-ui/core/Button";
@@ -37,16 +39,16 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     right: 0,
     top: 45,
-    visibility: 'hidden',
-    zIndex: 99
+    visibility: "hidden",
+    zIndex: 99,
   },
   showNotifications: {
-    visibility: 'visible'
+    visibility: "visible",
   },
   appContainer: {
-    height: '100%',
-    backgroundColor: '#e9ecff'
-  }
+    height: "100%",
+    backgroundColor: "#e9ecff",
+  },
 }));
 
 // const Home = () => {
@@ -99,16 +101,16 @@ const App = () => {
 
   const handleClickAway = () => {
     setShowNotifications(false);
-  }
+  };
 
   return (
     <Router basename="/#/">
       <div className={classes.appContainer}>
         <AppBar className={classes.appBar} position="static">
           <Toolbar>
-          <div>
-            <img style={{height: '75px'}} src={logo} />
-          </div>
+            <div>
+              <img style={{ height: "75px" }} src={logo} />
+            </div>
             <Typography variant="h6" className={classes.title}></Typography>
             <Button color="inherit">
               <Link className={classes.link} to="/home">
@@ -118,6 +120,16 @@ const App = () => {
             <Button color="inherit">
               <Link className={classes.link} to="/">
                 Watchlist
+              </Link>
+            </Button>
+            <Button color="inherit">
+              <Link className={classes.link} to="/halt-resume">
+                Halt Resume
+              </Link>
+            </Button>
+            <Button color="inherit">
+              <Link className={classes.link} to="/statistics">
+                Statistics
               </Link>
             </Button>
             <Button color="inherit">
@@ -131,13 +143,14 @@ const App = () => {
               onClick={toggleNotifications}
             >
               <NotificationsIcon />
-              
+
               <div>
                 <div
                   className={`${classes.notificationContainer} ${
                     showNotifications ? classes.showNotifications : ""
                   }`}
-                ><NotificationWidget />
+                >
+                  <NotificationWidget />
                 </div>
               </div>
             </IconButton>
@@ -152,6 +165,12 @@ const App = () => {
           </Route>
           <Route path="/bt">
             <BackTesting />
+          </Route>
+          <Route path="/halt-resume">
+            <HaltResume />
+          </Route>
+          <Route path="/statistics">
+            <Statistics />
           </Route>
           <Route path="/">
             <TickerHistory />

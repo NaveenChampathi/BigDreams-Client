@@ -14,9 +14,10 @@ const BAMSEC_ROOT = "https://www.bamsec.com";
 const useStyles = makeStyles({
   displayFlex: {
     display: "flex",
+    flexWrap: "wrap",
   },
   flexContainer: {
-    flex: 1,
+    width: 1000,
   },
   fundamentalsContainer: {
     display: "flex",
@@ -81,7 +82,7 @@ const useStyles = makeStyles({
   },
   filingsContainer: {
     margin: "8px 6px",
-    flex: 1,
+    width: 480,
   },
   filingsItemContainer: {
     display: "flex",

@@ -4,7 +4,11 @@ import { IconButton } from "@material-ui/core";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import * as React from "react";
 
-import { getIntradayBars, getIntradayTrades } from "client/apis/historyApi";
+import {
+  getIntradayBars,
+  getIntradayTrades,
+  getDailyBars,
+} from "client/apis/historyApi";
 
 import {
   elderRay,
@@ -68,34 +72,58 @@ const withOHLCData = (dataSet = "DAILY") => {
         };
       }
 
-      fetchIntradayData(date, ticker) {
-        // Intraday bars
-        getIntradayBars(date, ticker)
-          .then((data) => {
-            this.setState({
-              data: data.map((d) => ({
-                date: new Date(
-                  new Date(d.Timestamp).toLocaleString("en-US", {
-                    timeZone: "America/New_York",
-                  })
-                ),
-                timestamp: d.Timestamp,
-                open: d.OpenPrice,
-                high: d.HighPrice,
-                low: d.LowPrice,
-                close: d.ClosePrice,
-                volume: d.Volume,
-                vwap: d.vw,
-              })),
+      fetchData(date, ticker) {
+        if (dataSet === "DAILY") {
+          // Daily Data
+          getDailyBars(date, ticker)
+            .then((data) => {
+              this.setState({
+                data: data.map((d) => ({
+                  date: new Date(new Date(d.Timestamp)),
+                  timestamp: d.Timestamp,
+                  open: d.OpenPrice,
+                  high: d.HighPrice,
+                  low: d.LowPrice,
+                  close: d.ClosePrice,
+                  volume: d.Volume,
+                  vwap: d.vw,
+                })),
+              });
+            })
+            .catch((err) => {
+              console.log(err);
+              this.setState({
+                message: `Failed to fetch data.`,
+              });
             });
-          })
-          .catch((err) => {
-            console.log(err);
-            this.setState({
-              message: `Failed to fetch data.`,
+        } else {
+          // Intraday bars
+          getIntradayBars(date, ticker)
+            .then((data) => {
+              this.setState({
+                data: data.map((d) => ({
+                  date: new Date(
+                    new Date(d.Timestamp).toLocaleString("en-US", {
+                      timeZone: "America/New_York",
+                    })
+                  ),
+                  timestamp: d.Timestamp,
+                  open: d.OpenPrice,
+                  high: d.HighPrice,
+                  low: d.LowPrice,
+                  close: d.ClosePrice,
+                  volume: d.Volume,
+                  vwap: d.vw,
+                })),
+              });
+            })
+            .catch((err) => {
+              console.log(err);
+              this.setState({
+                message: `Failed to fetch data.`,
+              });
             });
-          });
-
+        }
         // Intraday Trades
         // getIntradayTrades(date, ticker)
         //   .then((data) => {
@@ -122,7 +150,7 @@ const withOHLCData = (dataSet = "DAILY") => {
         const { date, ticker } = this.props;
 
         if (date && ticker) {
-          this.fetchIntradayData(date, ticker);
+          this.fetchData(date, ticker);
         }
       }
 
@@ -130,7 +158,7 @@ const withOHLCData = (dataSet = "DAILY") => {
         const { date, ticker } = this.props;
 
         if (date && ticker) {
-          this.fetchIntradayData(date, ticker);
+          this.fetchData(date, ticker);
         }
       }
 
@@ -139,7 +167,7 @@ const withOHLCData = (dataSet = "DAILY") => {
         const { date: prevDate, ticker: prevTicker } = prevProps;
 
         if (date !== prevDate || ticker !== prevTicker) {
-          this.fetchIntradayData(date, ticker);
+          this.fetchData(date, ticker);
         }
       }
 
