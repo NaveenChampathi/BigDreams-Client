@@ -94,7 +94,7 @@ const HaltedTickers = ({ onRowClick, selectedTicker, updateType }) => {
                 onClick={() => onRowClick(haltDate, issueSymbol)}
               >
                 <div className={classes.flexContainer}>
-                  <Checkbox
+                  {/* <Checkbox
                     classes={{
                       root: classes.checkboxRoot,
                     }}
@@ -120,9 +120,11 @@ const HaltedTickers = ({ onRowClick, selectedTicker, updateType }) => {
                         !validMarketOpenHaltEntry
                       )
                     }
-                  />
+                  /> */}
                 </div>
-                <div className={classes.haltedTickersRowField}>{haltDate}</div>
+                <div className={classes.haltedTickersRowField}>
+                  {haltDate.split("T")[0]}
+                </div>
                 <div className={classes.haltedTickersRowField}>
                   {issueSymbol}
                 </div>

@@ -72,7 +72,7 @@ const withOHLCData = (dataSet = "DAILY") => {
         };
       }
 
-      fetchData(date, ticker) {
+      fetchData(date, ticker, timeframe) {
         if (dataSet === "DAILY") {
           // Daily Data
           getDailyBars(date, ticker)
@@ -98,7 +98,7 @@ const withOHLCData = (dataSet = "DAILY") => {
             });
         } else {
           // Intraday bars
-          getIntradayBars(date, ticker)
+          getIntradayBars(date, ticker, timeframe)
             .then((data) => {
               this.setState({
                 data: data.map((d) => ({
@@ -147,27 +147,35 @@ const withOHLCData = (dataSet = "DAILY") => {
       }
 
       componentDidMount() {
-        const { date, ticker } = this.props;
+        const { date, ticker, timeframe } = this.props;
 
         if (date && ticker) {
-          this.fetchData(date, ticker);
+          this.fetchData(date, ticker, timeframe);
         }
       }
 
       refreshData() {
-        const { date, ticker } = this.props;
+        const { date, ticker, timeframe } = this.props;
 
         if (date && ticker) {
-          this.fetchData(date, ticker);
+          this.fetchData(date, ticker, timeframe);
         }
       }
 
       componentDidUpdate(prevProps) {
-        const { date, ticker } = this.props;
-        const { date: prevDate, ticker: prevTicker } = prevProps;
+        const { date, ticker, timeframe } = this.props;
+        const {
+          date: prevDate,
+          ticker: prevTicker,
+          timeframe: prevTimeframe,
+        } = prevProps;
 
-        if (date !== prevDate || ticker !== prevTicker) {
-          this.fetchData(date, ticker);
+        if (
+          date !== prevDate ||
+          ticker !== prevTicker ||
+          timeframe !== prevTimeframe
+        ) {
+          this.fetchData(date, ticker, timeframe);
         }
       }
 
@@ -267,18 +275,17 @@ class StockChart extends React.Component {
     const timeDisplayFormat = timeFormat(dateTimeFormat);
 
     const getMarketOpenTime = () => {
-      let openMarketTimeIndex = 299;
+      let openMarketTimeIndices = [];
 
       if (data.length) {
         for (let i = 0; i < data.length; i++) {
           if (data[i].timestamp.includes("T09:30")) {
-            openMarketTimeIndex = i;
-            break;
+            openMarketTimeIndices.push(i);
           }
         }
       }
 
-      return openMarketTimeIndex;
+      return openMarketTimeIndices;
     };
 
     return (
@@ -352,12 +359,15 @@ class StockChart extends React.Component {
             displayFormat={this.pricesDisplayFormat}
             yAccessor={this.yEdgeIndicator}
           />
-          <StraightLine
-            type="vertical"
-            lineDash={"LongDash"}
-            xValue={getMarketOpenTime()}
-            lineWidth={2}
-          />
+          {getMarketOpenTime().map((index) => (
+            <StraightLine
+              type="vertical"
+              lineDash={"LongDash"}
+              xValue={index}
+              lineWidth={1}
+            />
+          ))}
+
           {/* <MovingAverageTooltip
             origin={[8, 24]}
             options={[

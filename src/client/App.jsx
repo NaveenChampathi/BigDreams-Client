@@ -10,9 +10,11 @@ import Home from "client/Pages/Home";
 import Button from "@material-ui/core/Button";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
+import Drawer from "@material-ui/core/Drawer";
 import Typography from "@material-ui/core/Typography";
 import { IconButton } from "@material-ui/core";
 import NotificationsIcon from "@material-ui/icons/Notifications";
+import MenuIcon from "@material-ui/icons/Menu";
 import NotificationWidget from "client/Pages/Home/Components/NotificationWidget";
 import logo from "client/images/logo.png";
 import "./app.scss";
@@ -32,7 +34,6 @@ const useStyles = makeStyles((theme) => ({
     color: "white",
   },
   link: {
-    color: "white",
     textDecoration: "none",
   },
   notificationContainer: {
@@ -48,6 +49,10 @@ const useStyles = makeStyles((theme) => ({
   appContainer: {
     height: "100%",
     backgroundColor: "#e9ecff",
+  },
+  linksContainer: {
+    color: "black",
+    margin: "16px 32px",
   },
 }));
 
@@ -94,6 +99,7 @@ const useStyles = makeStyles((theme) => ({
 const App = () => {
   const classes = useStyles();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
@@ -103,40 +109,70 @@ const App = () => {
     setShowNotifications(false);
   };
 
+  const toggleDrawer = (value) => {
+    setDrawerOpen(value);
+  };
+
   return (
     <Router basename="/#/">
       <div className={classes.appContainer}>
+        <Drawer
+          anchor={"left"}
+          open={drawerOpen}
+          onClose={() => toggleDrawer(false)}
+        >
+          <div className={classes.linksContainer}>
+            <div>
+              <Button color="inherit">
+                <Link className={classes.link} to="/home">
+                  Home
+                </Link>
+              </Button>
+            </div>
+            <div>
+              <Button color="inherit">
+                <Link className={classes.link} to="/">
+                  Watchlist
+                </Link>
+              </Button>
+            </div>
+            <div>
+              <Button color="inherit">
+                <Link className={classes.link} to="/halt-resume">
+                  Halt Resume
+                </Link>
+              </Button>
+            </div>
+            <div>
+              <Button color="inherit">
+                <Link className={classes.link} to="/statistics">
+                  Statistics
+                </Link>
+              </Button>
+            </div>
+            <div>
+              <Button color="inherit">
+                <Link className={classes.link} to="/bt">
+                  Back Testing
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </Drawer>
         <AppBar className={classes.appBar} position="static">
           <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="opem-menu"
+              onClick={() => toggleDrawer(true)}
+            >
+              <MenuIcon />
+            </IconButton>
             <div>
               <img style={{ height: "75px" }} src={logo} />
             </div>
             <Typography variant="h6" className={classes.title}></Typography>
-            <Button color="inherit">
-              <Link className={classes.link} to="/home">
-                Home
-              </Link>
-            </Button>
-            <Button color="inherit">
-              <Link className={classes.link} to="/">
-                Watchlist
-              </Link>
-            </Button>
-            <Button color="inherit">
-              <Link className={classes.link} to="/halt-resume">
-                Halt Resume
-              </Link>
-            </Button>
-            <Button color="inherit">
-              <Link className={classes.link} to="/statistics">
-                Statistics
-              </Link>
-            </Button>
-            <Button color="inherit">
-              <Link className={classes.link} to="/bt">
-                Back Testing
-              </Link>
-            </Button>
+
             <IconButton
               color="inherit"
               aria-label="delete"

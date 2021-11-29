@@ -31,8 +31,9 @@ const HaltResume = () => {
   const [ticker, setTicker] = useState(null);
 
   const getChartDate = (date) => {
-    const [month, day, year] = date.split("/");
-    return [year, month, day].join("-");
+    // const [year, month, day] = date.split("T")[0].split("-");
+    // return [year, month, day].join("-");
+    return date.split("T")[0];
   };
 
   const setTickerData = (date, ticker) => {
