@@ -3,6 +3,26 @@ import { timeFormat, timeParse } from "d3-time-format";
 import { IconButton } from "@material-ui/core";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import * as React from "react";
+import Select from "client/common/Dropdown/index.jsx";
+
+const timeframeOptions = [
+  {
+    label: "1 Min",
+    value: 1,
+  },
+  {
+    label: "3 Min",
+    value: 3,
+  },
+  {
+    label: "5 Min",
+    value: 5,
+  },
+  {
+    label: "15 Min",
+    value: 15,
+  },
+];
 
 import {
   getIntradayBars,
@@ -38,6 +58,7 @@ import {
 } from "react-financial-charts";
 
 import { OHLCTooltip } from "react-stockcharts/lib/tooltip";
+import { mergeClasses } from "@material-ui/styles";
 // import StraightLine from "react-financial-charts/series/src/StraightLine";
 
 const parseDate = timeParse("%Y-%m-%d");
@@ -69,10 +90,14 @@ const withOHLCData = (dataSet = "DAILY") => {
 
         this.state = {
           message: `Please query a ticker and select a date for chart`,
+          timeframe: 1,
         };
       }
 
-      fetchData(date, ticker, timeframe) {
+      fetchData(date, ticker, timeframe = 1) {
+        this.setState({
+          message: "Loading Chart...",
+        });
         if (dataSet === "DAILY") {
           // Daily Data
           getDailyBars(date, ticker)
@@ -98,7 +123,7 @@ const withOHLCData = (dataSet = "DAILY") => {
             });
         } else {
           // Intraday bars
-          getIntradayBars(date, ticker, timeframe)
+          getIntradayBars(date, ticker, timeframe, 0, 0)
             .then((data) => {
               this.setState({
                 data: data.map((d) => ({
@@ -162,21 +187,25 @@ const withOHLCData = (dataSet = "DAILY") => {
         }
       }
 
-      componentDidUpdate(prevProps) {
-        const { date, ticker, timeframe } = this.props;
-        const {
-          date: prevDate,
-          ticker: prevTicker,
-          timeframe: prevTimeframe,
-        } = prevProps;
+      componentDidUpdate(prevProps, prevState) {
+        const { date, ticker } = this.props;
+        const { timeframe } = this.state;
+        const { date: prevDate, ticker: prevTicker } = prevProps;
+        const { timeframe: prevTimeframe } = prevState;
 
         if (
           date !== prevDate ||
           ticker !== prevTicker ||
-          timeframe !== prevTimeframe
+          prevTimeframe !== timeframe
         ) {
           this.fetchData(date, ticker, timeframe);
         }
+      }
+
+      onTimeframeChange(e) {
+        this.setState({
+          timeframe: e.target.value,
+        });
       }
 
       render() {
@@ -198,14 +227,37 @@ const withOHLCData = (dataSet = "DAILY") => {
 
         return (
           <div>
-            <div style={{ textAlign: "right" }}>
-              <IconButton
-                color="inherit"
-                aria-label="refresh"
-                onClick={this.refreshData.bind(this)}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                style={{
+                  padding: "12px 12px 8px 12px",
+                }}
               >
-                <RefreshIcon />
-              </IconButton>
+                {!this.props.hideTimeframeOptions && (
+                  <Select
+                    options={timeframeOptions}
+                    label="Timeframe"
+                    onChange={this.onTimeframeChange.bind(this)}
+                    value={this.state.timeframe}
+                    showLabel={false}
+                  />
+                )}
+              </div>
+              <div>
+                <span>{`${this.props.ticker} ${this.props.date}`}</span>
+                <IconButton
+                  color="inherit"
+                  aria-label="refresh"
+                  onClick={this.refreshData.bind(this)}
+                >
+                  <RefreshIcon />
+                </IconButton>
+              </div>
             </div>
             <div>
               <OriginalComponent {...this.props} data={data} />
@@ -266,7 +318,7 @@ class StockChart extends React.Component {
 
     const gridHeight = height - margin.top - margin.bottom;
 
-    const elderRayHeight = 100;
+    const elderRayHeight = 150;
     const elderRayOrigin = (_, h) => [0, h - elderRayHeight];
     const barChartHeight = gridHeight / 4;
     const barChartOrigin = (_, h) => [0, h - barChartHeight - elderRayHeight];
@@ -274,7 +326,7 @@ class StockChart extends React.Component {
 
     const timeDisplayFormat = timeFormat(dateTimeFormat);
 
-    const getMarketOpenTime = () => {
+    const getMarketOpenLineIndices = () => {
       let openMarketTimeIndices = [];
 
       if (data.length) {
@@ -284,7 +336,6 @@ class StockChart extends React.Component {
           }
         }
       }
-
       return openMarketTimeIndices;
     };
 
@@ -302,28 +353,6 @@ class StockChart extends React.Component {
         xExtents={xExtents}
         zoomAnchor={lastVisibleItemBasedZoomAnchor}
       >
-        <Chart
-          id={2}
-          height={barChartHeight}
-          origin={barChartOrigin}
-          yExtents={this.barChartExtents}
-        >
-          <YAxis
-            axisAt="left"
-            orient="right"
-            ticks={5}
-            tickFormat={format(".2s")}
-          />
-          <MouseCoordinateY
-            at="left"
-            orient="right"
-            displayFormat={format(".4s")}
-          />
-          <BarSeries
-            fillStyle={this.volumeColor}
-            yAccessor={this.volumeSeries}
-          />
-        </Chart>
         <Chart id={3} height={chartHeight} yExtents={this.candleChartExtents}>
           <XAxis showGridLines gridLinesStrokeStyle="#e0e3eb" />
           <YAxis showGridLines tickFormat={this.pricesDisplayFormat} />
@@ -359,12 +388,12 @@ class StockChart extends React.Component {
             displayFormat={this.pricesDisplayFormat}
             yAccessor={this.yEdgeIndicator}
           />
-          {getMarketOpenTime().map((index) => (
+          {getMarketOpenLineIndices().map((i) => (
             <StraightLine
               type="vertical"
               lineDash={"LongDash"}
-              xValue={index}
-              lineWidth={1}
+              xValue={i}
+              lineWidth={2}
             />
           ))}
 
@@ -388,6 +417,29 @@ class StockChart extends React.Component {
 
           <ZoomButtons />
           <OHLCTooltip origin={[8, 16]} />
+        </Chart>
+        <Chart
+          id={4}
+          height={elderRayHeight}
+          origin={elderRayOrigin}
+          yExtents={this.barChartExtents}
+          padding={{ top: 16, bottom: 8 }}
+        >
+          <YAxis
+            axisAt="left"
+            orient="right"
+            ticks={5}
+            tickFormat={format(".2s")}
+          />
+          <MouseCoordinateY
+            at="left"
+            orient="right"
+            displayFormat={format(".4s")}
+          />
+          <BarSeries
+            fillStyle={this.volumeColor}
+            yAccessor={this.volumeSeries}
+          />
         </Chart>
         {/* <Chart
           id={4}
@@ -436,9 +488,7 @@ class StockChart extends React.Component {
   };
 
   volumeColor = (data) => {
-    return data.close > data.open
-      ? "rgba(38, 166, 154, 0.3)"
-      : "rgba(239, 83, 80, 0.3)";
+    return data.close > data.open ? "#26a69a" : "#ef5350";
   };
 
   volumeSeries = (data) => {

@@ -168,7 +168,7 @@ const Widget = ({ onAlertClick }) => {
               </div>
             ))}
           </div>
-          <div className={classes.secondaryContainer}>
+          {/* <div className={classes.secondaryContainer}>
             {secondaryNotifications.map(({ message, count, symbol }, i) => (
               <div
                 key={i}
@@ -185,7 +185,7 @@ const Widget = ({ onAlertClick }) => {
                 {message}
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
       </Paper>
     </div>

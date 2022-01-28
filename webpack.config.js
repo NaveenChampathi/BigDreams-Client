@@ -38,7 +38,7 @@ module.exports = {
     },
   },
   devServer: {
-    port: 3001,
+    port: 8000,
     open: true,
     historyApiFallback: true,
     proxy: {
@@ -52,11 +52,13 @@ module.exports = {
       favicon: "./public/favicon.ico",
     }),
     new CopyWebpackPlugin({
-      patterns: [{
+      patterns: [
+        {
           //Note:- No wildcard is specified hence will copy all files and folders
-          from: 'src/client/sounds', //Will resolve to RepoDir/src/assets 
-          to: 'sounds' //Copies all files from above dest to dist/assets
-      }]
-    })
+          from: "src/client/sounds", //Will resolve to RepoDir/src/assets
+          to: "sounds", //Copies all files from above dest to dist/assets
+        },
+      ],
+    }),
   ],
 };
