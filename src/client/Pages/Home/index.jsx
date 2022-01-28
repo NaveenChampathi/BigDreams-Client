@@ -11,28 +11,35 @@ const useStyles = makeStyles({
   flex: {
     display: "flex",
     justifyContent: "space-between",
+    flexWrap: "wrap",
   },
   container: {
     marginLeft: "12px",
     marginRight: "12px",
+    overflowX: "auto",
+    height: "calc(100% - 64px)",
   },
   notificationWidgetContainer: {
     maxHeight: "350px",
     margin: "12px 0",
-    width: 1000,
+    // width: 1000,
   },
   chartContainer: {
     textAlign: "initial",
     margin: "12px",
-    height: "560px",
+    height: "630px",
     flex: 1,
     backgroundColor: "white",
   },
   dailyChartContainer: {
     textAlign: "initial",
-    margin: "12px",
+    margin: "12px 12px 12px 0px",
     backgroundColor: "white",
     flex: 1,
+  },
+  flexWrap: {
+    display: "flex",
+    flexWrap: "wrap",
   },
 });
 
@@ -52,9 +59,8 @@ const Home = () => {
         <div className={classes.flex}>
           <HistoryWidget onGapperItemClick={onGapperItemClick} />
           <div className={classes.chartContainer}>
-            $
             <Chart date={date} ticker={ticker} />
-            <div className={classes.flex}>
+            <div className={classes.flexWrap}>
               <div className={classes.dailyChartContainer}>
                 <DailyChart date={date} ticker={ticker} />
               </div>

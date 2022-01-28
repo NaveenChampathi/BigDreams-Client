@@ -1,8 +1,9 @@
-import axios from 'axios';
+import axios from "axios";
+import { BE_BASE } from "../constants";
 
-const SNAPSHOT = 'http://localhost:3000/v1/snapshot/';
-const GAINERS = SNAPSHOT + 'gainers';
+const SNAPSHOT = BE_BASE + "/v1/snapshot/";
+const GAINERS = SNAPSHOT + "gainers";
 
 export const getTopGainers = () => {
-    return axios.get(GAINERS).then(res => res.data);
-}
+  return axios.get(GAINERS).then((res) => res.data);
+};

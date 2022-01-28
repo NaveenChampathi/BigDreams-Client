@@ -1,6 +1,7 @@
 import axios from "axios";
+import { BE_BASE } from "../constants";
 
-const SNAPSHOT = "http://localhost:3000/v1/halts/";
+const SNAPSHOT = BE_BASE + "/v1/halts/";
 const NASDAQ = SNAPSHOT + "nasdaq";
 const HALTED_TICKERS = SNAPSHOT + "get-halted-tickers";
 const MARK_TICKER = SNAPSHOT + "mark-ticker";

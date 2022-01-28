@@ -1,14 +1,14 @@
 import socketIOClient from "socket.io-client";
 
-const ENDPOINT = "http://localhost:4001";
+const ENDPOINT = "http://localhost:8002";
 let _socket = null;
 
 export const connectSocket = () => {
-    if(!_socket) {
-        _socket = socketIOClient(ENDPOINT);
-    } 
+  if (!_socket) {
+    _socket = socketIOClient(ENDPOINT);
+  }
 
-    return _socket;
-}
+  return _socket;
+};
 
 export const connectedSocket = () => connectSocket();

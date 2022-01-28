@@ -2,6 +2,11 @@ import React, { Component, useState, useEffect, useRef } from "react";
 import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
+import Accordion from "@material-ui/core/Accordion";
+import AccordionSummary from "@material-ui/core/AccordionSummary";
+import AccordionDetails from "@material-ui/core/AccordionDetails";
+import Typography from "@material-ui/core/Typography";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { getHighVolumeDailyBars } from "client/apis/historyApi";
 import {
   getFundamentalsFinviz,
@@ -82,7 +87,7 @@ const useStyles = makeStyles({
   },
   filingsContainer: {
     margin: "8px 6px",
-    width: 480,
+    width: 465,
   },
   filingsItemContainer: {
     display: "flex",
@@ -294,82 +299,93 @@ const Widget = ({ onGapperItemClick }) => {
           </div>
         </div>
       </Paper>
-      <div className={classes.displayFlex}>
-        {/* Filings */}
-        {financialFilingsResults && (
-          <Paper variant="outlined" className={classes.filingsContainer}>
-            {financialFilingsResults.map(
-              ({ filingType, filingDate, filingUrl, title }) => (
-                <a
-                  target="_blank"
-                  href={`${BAMSEC_ROOT}${filingUrl}`}
-                  className={classes.filingsItemContainer}
-                >
-                  <div>{filingType}</div>
-                  <div className={classes.filingTitle}>{title}</div>
-                  <div>{filingDate}</div>
-                </a>
-              )
+      <Accordion className={classes.margin}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <Typography>Filings</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <div className={classes.displayFlex}>
+            {/* Filings */}
+            {financialFilingsResults && (
+              <Paper variant="outlined" className={classes.filingsContainer}>
+                {financialFilingsResults.map(
+                  ({ filingType, filingDate, filingUrl, title }) => (
+                    <a
+                      target="_blank"
+                      href={`${BAMSEC_ROOT}${filingUrl}`}
+                      className={classes.filingsItemContainer}
+                    >
+                      <div>{filingType}</div>
+                      <div className={classes.filingTitle}>{title}</div>
+                      <div>{filingDate}</div>
+                    </a>
+                  )
+                )}
+              </Paper>
             )}
-          </Paper>
-        )}
 
-        {/* registration */}
-        {registrationsFilingsResults && (
-          <Paper variant="outlined" className={classes.filingsContainer}>
-            {registrationsFilingsResults.map(
-              ({ filingType, filingDate, filingUrl, title }) => (
-                <a
-                  target="_blank"
-                  href={`${BAMSEC_ROOT}${filingUrl}`}
-                  className={classes.filingsItemContainer}
-                >
-                  <div>{filingType}</div>
-                  <div className={classes.filingTitle}>{title}</div>
-                  <div>{filingDate}</div>
-                </a>
-              )
+            {/* registration */}
+            {registrationsFilingsResults && (
+              <Paper variant="outlined" className={classes.filingsContainer}>
+                {registrationsFilingsResults.map(
+                  ({ filingType, filingDate, filingUrl, title }) => (
+                    <a
+                      target="_blank"
+                      href={`${BAMSEC_ROOT}${filingUrl}`}
+                      className={classes.filingsItemContainer}
+                    >
+                      <div>{filingType}</div>
+                      <div className={classes.filingTitle}>{title}</div>
+                      <div>{filingDate}</div>
+                    </a>
+                  )
+                )}
+              </Paper>
             )}
-          </Paper>
-        )}
 
-        {/* Other */}
-        {otherFilingsResults && (
-          <Paper variant="outlined" className={classes.filingsContainer}>
-            {otherFilingsResults.map(
-              ({ filingType, filingDate, filingUrl, title }) => (
-                <a
-                  target="_blank"
-                  href={`${BAMSEC_ROOT}${filingUrl}`}
-                  className={classes.filingsItemContainer}
-                >
-                  <div>{filingType}</div>
-                  <div className={classes.filingTitle}>{title}</div>
-                  <div>{filingDate}</div>
-                </a>
-              )
+            {/* Other */}
+            {otherFilingsResults && (
+              <Paper variant="outlined" className={classes.filingsContainer}>
+                {otherFilingsResults.map(
+                  ({ filingType, filingDate, filingUrl, title }) => (
+                    <a
+                      target="_blank"
+                      href={`${BAMSEC_ROOT}${filingUrl}`}
+                      className={classes.filingsItemContainer}
+                    >
+                      <div>{filingType}</div>
+                      <div className={classes.filingTitle}>{title}</div>
+                      <div>{filingDate}</div>
+                    </a>
+                  )
+                )}
+              </Paper>
             )}
-          </Paper>
-        )}
-        {/* Other */}
-        {newsFilingsResults && (
-          <Paper variant="outlined" className={classes.filingsContainer}>
-            {newsFilingsResults.map(
-              ({ filingType, filingDate, filingUrl, title }) => (
-                <a
-                  target="_blank"
-                  href={`${BAMSEC_ROOT}${filingUrl}`}
-                  className={classes.filingsItemContainer}
-                >
-                  <div>{filingType}</div>
-                  <div className={classes.filingTitle}>{title}</div>
-                  <div>{filingDate}</div>
-                </a>
-              )
+            {/* Other */}
+            {newsFilingsResults && (
+              <Paper variant="outlined" className={classes.filingsContainer}>
+                {newsFilingsResults.map(
+                  ({ filingType, filingDate, filingUrl, title }) => (
+                    <a
+                      target="_blank"
+                      href={`${BAMSEC_ROOT}${filingUrl}`}
+                      className={classes.filingsItemContainer}
+                    >
+                      <div>{filingType}</div>
+                      <div className={classes.filingTitle}>{title}</div>
+                      <div>{filingDate}</div>
+                    </a>
+                  )
+                )}
+              </Paper>
             )}
-          </Paper>
-        )}
-      </div>
+          </div>
+        </AccordionDetails>
+      </Accordion>
     </div>
   );
 };

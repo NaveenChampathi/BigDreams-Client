@@ -6,6 +6,7 @@ import BackTesting from "client/Pages/BackTesting";
 import HaltResume from "client/Pages/HaltResume";
 import Statistics from "client/Pages/Stats";
 import TickerHistory from "client/Pages/TickerHistory";
+import Gapups from "client/Pages/Gapups";
 import Home from "client/Pages/Home";
 import Button from "@material-ui/core/Button";
 import AppBar from "@material-ui/core/AppBar";
@@ -28,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
   appBar: {
-    marginBottom: 32,
+    marginBottom: 16,
     color: "white",
   },
   link: {
@@ -48,6 +49,7 @@ const useStyles = makeStyles((theme) => ({
   appContainer: {
     height: "100%",
     backgroundColor: "#e9ecff",
+    overflow: "hidden",
   },
 }));
 
@@ -133,6 +135,11 @@ const App = () => {
               </Link>
             </Button>
             <Button color="inherit">
+              <Link className={classes.link} to="/gap-ups">
+                Gap ups
+              </Link>
+            </Button>
+            <Button color="inherit">
               <Link className={classes.link} to="/bt">
                 Back Testing
               </Link>
@@ -171,6 +178,9 @@ const App = () => {
           </Route>
           <Route path="/statistics">
             <Statistics />
+          </Route>
+          <Route path="/gap-ups">
+            <Gapups />
           </Route>
           <Route path="/">
             <TickerHistory />
