@@ -1,9 +1,17 @@
 import { format } from "d3-format";
 import { timeFormat, timeParse } from "d3-time-format";
-import { IconButton } from "@material-ui/core";
+import { IconButton, withStyles } from "@material-ui/core";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import * as React from "react";
+import ToggleButton from "@material-ui/lab/ToggleButton";
+import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import Select from "client/common/Dropdown/index.jsx";
+
+const useStyles = (theme) => ({
+  toggleButtonGroupRoot: {
+    height: 28,
+  },
+});
 
 const timeframeOptions = [
   {
@@ -122,8 +130,37 @@ const withOHLCData = (dataSet = "DAILY") => {
               });
             });
         } else {
+          let numberOfDaysBack = 0;
+          let numberOfDaysForward = 0;
+
+          switch (timeframe) {
+            case 1:
+              numberOfDaysBack = 0;
+              numberOfDaysForward = 0;
+              break;
+            case 3:
+              numberOfDaysBack = 1;
+              numberOfDaysForward = 1;
+              break;
+            case 5:
+              numberOfDaysBack = 3;
+              numberOfDaysForward = 3;
+              break;
+            case 15:
+              numberOfDaysBack = 5;
+              numberOfDaysForward = 5;
+              break;
+            default:
+          }
+
           // Intraday bars
-          getIntradayBars(date, ticker, timeframe, 0, 0)
+          getIntradayBars(
+            date,
+            ticker,
+            timeframe,
+            numberOfDaysBack,
+            numberOfDaysForward
+          )
             .then((data) => {
               this.setState({
                 data: data.map((d) => ({
@@ -202,14 +239,15 @@ const withOHLCData = (dataSet = "DAILY") => {
         }
       }
 
-      onTimeframeChange(e) {
+      onTimeframeChange(e, newTimeFrame) {
         this.setState({
-          timeframe: e.target.value,
+          timeframe: newTimeFrame,
         });
       }
 
       render() {
         const { data, message } = this.state;
+        const { classes } = this.props;
         if (data === undefined) {
           return (
             <div
@@ -239,13 +277,29 @@ const withOHLCData = (dataSet = "DAILY") => {
                 }}
               >
                 {!this.props.hideTimeframeOptions && (
-                  <Select
-                    options={timeframeOptions}
-                    label="Timeframe"
-                    onChange={this.onTimeframeChange.bind(this)}
+                  // <Select
+                  //   options={timeframeOptions}
+                  //   label="Timeframe"
+                  //   onChange={this.onTimeframeChange.bind(this)}
+                  //   value={this.state.timeframe}
+                  //   showLabel={false}
+                  // />
+
+                  <ToggleButtonGroup
                     value={this.state.timeframe}
-                    showLabel={false}
-                  />
+                    exclusive
+                    onChange={this.onTimeframeChange.bind(this)}
+                    aria-label="text alignment"
+                    classes={{
+                      root: classes.toggleButtonGroupRoot,
+                    }}
+                  >
+                    {timeframeOptions.map(({ value, label }, i) => (
+                      <ToggleButton value={value} aria-label="left aligned">
+                        {label}
+                      </ToggleButton>
+                    ))}
+                  </ToggleButtonGroup>
                 )}
               </div>
               <div>
@@ -280,6 +334,7 @@ class StockChart extends React.Component {
 
   render() {
     const { props, margin, xScaleProvider } = this;
+    const { classes } = props;
     const {
       data: initialData,
       dateTimeFormat = "%d %b",
@@ -500,14 +555,24 @@ class StockChart extends React.Component {
   };
 }
 
-export default withOHLCData()(
-  withSize({ style: { minHeight: 600 } })(withDeviceRatio()(StockChart))
+export default withStyles(useStyles)(
+  withOHLCData()(
+    withSize({ style: { minHeight: 600 } })(withDeviceRatio()(StockChart))
+  )
 );
 
-export const MinutesStockChart = withOHLCData("MINUTES")(
-  withSize({ style: { minHeight: 600 } })(withDeviceRatio()(StockChart))
+export const MinutesStockChart = withStyles(useStyles)(
+  withOHLCData("MINUTES")(
+    withSize({ style: { minHeight: 600 } })(
+      withDeviceRatio()(withStyles(useStyles)(StockChart))
+    )
+  )
 );
 
-export const SecondsStockChart = withOHLCData("SECONDS")(
-  withSize({ style: { minHeight: 600 } })(withDeviceRatio()(StockChart))
+export const SecondsStockChart = withStyles(useStyles)(
+  withOHLCData("SECONDS")(
+    withSize({ style: { minHeight: 600 } })(
+      withDeviceRatio()(withStyles(useStyles)(StockChart))
+    )
+  )
 );

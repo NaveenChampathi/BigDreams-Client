@@ -7,6 +7,9 @@ const GET_DAILY_BARS = HISTORY + "/get-daily-bars/";
 const GET_INTRADAY_BARS = HISTORY + "/get-bars/intraday/";
 const GET_INTRADAY_TRADES = HISTORY + "/get-trades/intraday/";
 const GET_ALL_GAPPED_TICKERS = HISTORY + "/get-all-gapped-tickers";
+const GET_ALL_MARKET_OPEN_GAPPED_TICKERS =
+  HISTORY + "//get-all-morning-open-gapped-tickers";
+const GET_ALL_MULTI_DAY_GAPPED_TICKERS = HISTORY + "/get-all-multi-day-tickers";
 
 export const getHighVolumeDailyBars = (ticker) => {
   return axios.get(GET_HIGH_VOLUME_DAILY_BARS + ticker).then((res) => res.data);
@@ -40,4 +43,10 @@ export const getIntradayTrades = (date, ticker) => {
 
 export const getAllGappedTickers = () => {
   return axios.get(GET_ALL_GAPPED_TICKERS).then((res) => res.data);
+};
+export const getAllMarketOpenGappedTickers = () => {
+  return axios.get(GET_ALL_MARKET_OPEN_GAPPED_TICKERS).then((res) => res.data);
+};
+export const getAllMultidayTickers = () => {
+  return axios.get(GET_ALL_MULTI_DAY_GAPPED_TICKERS).then((res) => res.data);
 };

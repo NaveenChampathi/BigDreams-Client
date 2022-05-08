@@ -6,6 +6,7 @@ import BackTesting from "client/Pages/BackTesting";
 import HaltResume from "client/Pages/HaltResume";
 import Statistics from "client/Pages/Stats";
 import TickerHistory from "client/Pages/TickerHistory";
+import Patterns from "client/Pages/Patterns";
 import Gapups from "client/Pages/Gapups";
 import Home from "client/Pages/Home";
 import Button from "@material-ui/core/Button";
@@ -140,8 +141,8 @@ const App = () => {
             </div>
             <div>
               <Button color="inherit">
-                <Link className={classes.link} to="/halt-resume">
-                  Halt Resume
+                <Link className={classes.link} to="/patterns">
+                  Patterns
                 </Link>
               </Button>
             </div>
@@ -202,6 +203,9 @@ const App = () => {
           </Route>
           <Route path="/bt">
             <BackTesting />
+          </Route>
+          <Route path="/patterns">
+            <Patterns />
           </Route>
           <Route path="/halt-resume">
             <HaltResume />
