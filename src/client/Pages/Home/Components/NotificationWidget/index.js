@@ -62,7 +62,7 @@ const useStyles = makeStyles({
   },
 });
 
-const Widget = ({ onAlertClick }) => {
+const Widget = ({ onAlertClick = () => {} }) => {
   const [notifications, setNotifications] = useState([]);
   const [secondaryNotifications, setSecondaryNotifications] = useState([]);
   const notificationStateRef = useRef();
@@ -153,7 +153,7 @@ const Widget = ({ onAlertClick }) => {
   const classes = useStyles();
   return (
     <div>
-      <Paper variant="outlined">
+      <Paper>
         <div className={classes.container}>
           <div className={classes.primaryContainer}>
             {notifications.map(({ message, ticker }, i) => (

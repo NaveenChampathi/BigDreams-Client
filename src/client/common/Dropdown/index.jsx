@@ -10,6 +10,7 @@ export default function BasicSelect({
   value,
   label,
   showLabel = true,
+  classes = {},
 }) {
   return (
     <FormControl>
@@ -22,6 +23,7 @@ export default function BasicSelect({
         value={value}
         label={label}
         onChange={onChange}
+        classes={classes}
       >
         {options.map(({ label, value }) => (
           <MenuItem value={value}> {label} </MenuItem>

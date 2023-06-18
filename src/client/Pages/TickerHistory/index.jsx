@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
@@ -31,7 +33,7 @@ import {
   getConnectionStatus,
 } from "client/apis/streamingApi";
 import { getTopGainers } from "client/apis/snapshotApi";
-import {getFundamentalsFinviz} from "client/apis/fundamentalsApi";
+import { getFundamentalsFinviz } from "client/apis/fundamentalsApi";
 
 import { playSwipe, playFlush } from "client/sounds/play";
 import { numberWithCommas } from "client/utils";
@@ -76,13 +78,13 @@ const useStyles = makeStyles({
     marginRight: 16,
   },
   actions: {
-    display: 'flex'
+    display: "flex",
   },
   lists: {
-    display: 'flex',
-    '& button': {
-      borderRadius: 0
-    }
+    display: "flex",
+    "& button": {
+      borderRadius: 0,
+    },
   },
   green: {
     color: "green",
@@ -96,24 +98,109 @@ const useStyles = makeStyles({
     display: "flex",
   },
   block: {
-    display: 'block'
+    display: "block",
   },
   none: {
-    display: 'none'
+    display: "none",
   },
   buttonBorderHighlight: {
-    borderBottom: '2px solid blue'
+    borderBottom: "2px solid blue",
   },
   rowBgGreen: {
-    backgroundColor: '#a4e6a4'
+    backgroundColor: "#a4e6a4",
   },
   rowBgRed: {
-    backgroundColor: '#efb7b7'
+    backgroundColor: "#efb7b7",
   },
   rowBgYellow: {
-    backgroundColor: '#f1f19c'
-  }
+    backgroundColor: "#f1f19c",
+  },
+  streamingContainer: {
+    display: "flex",
+    margin: "16px 0px",
+    flexWrap: "wrap",
+  },
+  streamingItem: {
+    width: "50%",
+  },
+  stream: {
+    height: 400,
+    margin: "0px 16px",
+  },
+
+  // Stacked chart styles
+  container: {
+    display: "flex",
+    margin: "16px 24px",
+  },
+  chartContainer: {
+    margin: 8,
+    padding: 8,
+  },
 });
+
+const StackColumnChart = ({ data, segments }) => {
+  let xAxisLabels = [];
+  let columnsData = [];
+
+  if (Object.keys(data).length) {
+    xAxisLabels = Object.keys(data);
+    columnsData = segments.map((segment) => ({
+      name: segment,
+      data: xAxisLabels.map((label) => data[label][segment] || null),
+    }));
+
+    // columnsData = columnsData.sort((a, b) => b.data[0] - a.data[0]);
+  }
+
+  const options = {
+    chart: {
+      type: "column",
+      height: 400,
+      scrollablePlotArea: {
+        minWidth: 500,
+        scrollPositionX: 0,
+        opacity: 0,
+      },
+    },
+
+    title: {
+      text: "Trades by Time/Price",
+      align: "left",
+    },
+    xAxis: {
+      categories: xAxisLabels,
+    },
+    yAxis: {
+      min: 0,
+      title: {
+        text: "Volume",
+      },
+    },
+    legend: {
+      enabled: false,
+    },
+    tooltip: {
+      headerFormat: "<b>{point.x}</b><br/>",
+      pointFormat: "{series.name}: {point.y}<br/>Total: {point.stackTotal}",
+    },
+    plotOptions: {
+      column: {
+        // grouping: true,
+        // stacking: "normal",
+        shadow: false,
+        pointWidth: 8,
+      },
+    },
+    series: columnsData,
+  };
+
+  return (
+    <div>
+      <HighchartsReact highcharts={Highcharts} options={options} />
+    </div>
+  );
+};
 
 const App = () => {
   const [ticker, setTicker] = useState("");
@@ -124,6 +211,10 @@ const App = () => {
   const [lastTrades, setLastTrades] = useState({});
   const [tickersFundamentals, setTickersFundamentals] = useState({});
   const [showWatchlist, setShowWatchlist] = useState(true);
+  const trades = useRef({});
+  const [formattedTrades, setFormattedTrades] = useState({});
+  const lastUpdatedRef = useRef(0);
+  const [lastUpdated, setLastUpdated] = useState(Date.now());
 
   const getTickersFromWatchlist = (_id) => {
     getSpecificWatchlist(_id).then((res) => {
@@ -168,16 +259,18 @@ const App = () => {
   };
 
   const getFundamentals = (ticker) => {
-    getFundamentalsFinviz(ticker).then(({symbol, data}) => {
+    getFundamentalsFinviz(ticker).then(({ symbol, data }) => {
       _tickersFundamentals[ticker] = data;
-      setTickersFundamentals(Object.assign({}, tickersFundamentals, {[symbol]: data}));
+      setTickersFundamentals(
+        Object.assign({}, tickersFundamentals, { [symbol]: data })
+      );
       console.log(tickersFundamentals);
     });
-  }
+  };
 
   const toggleListView = (_showWatchlist) => {
     setShowWatchlist(_showWatchlist);
-  }
+  };
 
   useEffect(() => {
     const socket = connectSocket();
@@ -186,25 +279,40 @@ const App = () => {
       setLastTrades(data);
     });
 
+    socket.on("Trade", (data) => {
+      const _trades = { ...trades.current };
+
+      if (_trades[data.Symbol]) {
+        _trades[data.Symbol].push(data);
+      } else {
+        _trades[data.Symbol] = [data];
+      }
+      trades.current = _trades;
+    });
+
     socket.on("TickerFundamentals", ({ ticker, data }) => {
       _tickersFundamentals[ticker] = data;
       setTickersFundamentals(_tickersFundamentals);
     });
 
     socket.on("gainers", (data) => {
-      const previousDataTickers = _tickersClone.map(t => t.symbol);
-      const currentDataTickers = data.map(d => d.symbol);
+      const previousDataTickers = _tickersClone.map((t) => t.symbol);
+      const currentDataTickers = data.map((d) => d.symbol);
 
       const _data = data.map((_ticker) => {
-        const tickerIndexFromCurrentData = currentDataTickers.indexOf(_ticker.symbol);
-        const tickerIndexFromPreviousData = previousDataTickers.indexOf(_ticker.symbol);
+        const tickerIndexFromCurrentData = currentDataTickers.indexOf(
+          _ticker.symbol
+        );
+        const tickerIndexFromPreviousData = previousDataTickers.indexOf(
+          _ticker.symbol
+        );
 
-        if(tickerIndexFromPreviousData === -1) {
+        if (tickerIndexFromPreviousData === -1) {
           _ticker.newEntry = true;
         } else {
-          if(tickerIndexFromCurrentData > tickerIndexFromPreviousData) {
+          if (tickerIndexFromCurrentData > tickerIndexFromPreviousData) {
             _ticker.movedLower = true;
-          } else if(tickerIndexFromCurrentData < tickerIndexFromPreviousData) {
+          } else if (tickerIndexFromCurrentData < tickerIndexFromPreviousData) {
             _ticker.movedHigher = true;
           }
         }
@@ -239,7 +347,71 @@ const App = () => {
       socket.off("LastTrade");
       socket.off("TickerFundamentals");
       socket.off("gainers");
-    }
+    };
+  }, []);
+
+  useEffect(() => {
+    const _currentTrades = { ...trades.current };
+    const symbols = Object.keys(_currentTrades);
+
+    const _formattedTrades = {};
+
+    symbols.forEach((symbol) => {
+      const _trades = _currentTrades[symbol] || [];
+      const formattedTradesByTimeAndPrice = {};
+
+      _trades.forEach((t) => {
+        const price = parseFloat(t.Price).toFixed(2);
+        const _time = t.Timestamp.split("T")[1]?.split("-")[0];
+        const [hours, minutes] = _time.split(":");
+        const timeHourMinutes = `${hours}:${minutes}`;
+
+        if (!formattedTradesByTimeAndPrice[timeHourMinutes]) {
+          formattedTradesByTimeAndPrice[timeHourMinutes] = {
+            [price]: t.Size,
+          };
+        } else {
+          if (!formattedTradesByTimeAndPrice[timeHourMinutes][price]) {
+            formattedTradesByTimeAndPrice[timeHourMinutes] = {
+              ...formattedTradesByTimeAndPrice[timeHourMinutes],
+              [price]: t.Size,
+            };
+          } else {
+            formattedTradesByTimeAndPrice[timeHourMinutes][price] += t.Size;
+          }
+        }
+      });
+
+      let formattedTradesByPrice = {};
+
+      _trades.forEach((t) => {
+        const _time = t.Timestamp.split("T")[1]?.split("-")[0];
+        const price = parseFloat(t.Price).toFixed(2);
+
+        const [hours, minutes] = _time.split(":");
+
+        if (!formattedTradesByPrice[price]) {
+          formattedTradesByPrice[price] = t.Size;
+        } else {
+          formattedTradesByPrice[price] += t.Size;
+        }
+      });
+
+      _formattedTrades[symbol] = {
+        formattedTradesByTimeAndPrice,
+        formattedTradesByPrice,
+      };
+    });
+
+    setFormattedTrades(_formattedTrades);
+  }, [lastUpdated]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setLastUpdated(Date.now());
+    }, 2000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const classes = useStyles();
@@ -333,74 +505,101 @@ const App = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tickers.map(({ symbol, changeRatio, volume, newEntry, movedHigher, movedLower, close }, i) => (
-                  <TableRow key={i} className={newEntry ? classes.rowBgYellow : (movedHigher ? classes.rowBgGreen : (movedLower ? classes.rowBgRed : ""))}>
-                    <TableCell>
-                      {tickersInWatchlist.indexOf(symbol.toUpperCase()) > -1 ? (
-                        <IconButton
-                          variant="contained"
-                          color="primary"
-                          onClick={() => updateTickers(false, symbol)}
-                        >
-                          <RemoveIcon />
-                        </IconButton>
-                      ) : (
-                        <div className={classes.iconButtonsContainer}>
-                          <IconButton
-                            variant="contained"
-                            color="primary"
-                            onClick={() => updateTickers(true, symbol)}
-                          >
-                            <AddIcon />
-                          </IconButton>
-                          <IconButton
-                            variant="contained"
-                            color="primary"
-                            onClick={() => removeTicker(symbol)}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      {symbol}
-                    </TableCell>
-                    <TableCell
-                      align="right"
+                {tickers.map(
+                  (
+                    {
+                      symbol,
+                      changeRatio,
+                      volume,
+                      newEntry,
+                      movedHigher,
+                      movedLower,
+                      close,
+                    },
+                    i
+                  ) => (
+                    <TableRow
+                      key={i}
+                      className={
+                        newEntry
+                          ? classes.rowBgYellow
+                          : movedHigher
+                          ? classes.rowBgGreen
+                          : movedLower
+                          ? classes.rowBgRed
+                          : ""
+                      }
                     >
-                      {close}
-                    </TableCell>
-                    <TableCell component="th" scope="row" align="right">
-                      {changeRatio ? (changeRatio * 100).toFixed(2) + "%" : ""}
-                    </TableCell>
-                    <TableCell component="th" scope="row" align="right">
-                      {volume ? numberWithCommas(volume) : ""}
-                    </TableCell>
-                    <TableCell align="right">
-                      {tickersFundamentals[symbol]
-                        ? tickersFundamentals[symbol]["Shs Float"]
-                        : <IconButton
-                        variant="contained"
-                        color="primary"
-                        onClick={() => getFundamentals(symbol)}
-                      >
-                        <GetAppIcon />
-                      </IconButton>}
-                    </TableCell>
-                    <TableCell align="right">
-                      {tickersFundamentals[symbol]
-                        ? tickersFundamentals[symbol]["Insider Own"]
-                        : <IconButton
-                        variant="contained"
-                        color="primary"
-                        onClick={() => getFundamentals(symbol)}
-                      >
-                        <GetAppIcon />
-                      </IconButton>}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      <TableCell>
+                        {tickersInWatchlist.indexOf(symbol.toUpperCase()) >
+                        -1 ? (
+                          <IconButton
+                            variant="contained"
+                            color="primary"
+                            onClick={() => updateTickers(false, symbol)}
+                          >
+                            <RemoveIcon />
+                          </IconButton>
+                        ) : (
+                          <div className={classes.iconButtonsContainer}>
+                            <IconButton
+                              variant="contained"
+                              color="primary"
+                              onClick={() => updateTickers(true, symbol)}
+                            >
+                              <AddIcon />
+                            </IconButton>
+                            <IconButton
+                              variant="contained"
+                              color="primary"
+                              onClick={() => removeTicker(symbol)}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell component="th" scope="row">
+                        {symbol}
+                      </TableCell>
+                      <TableCell align="right">{close}</TableCell>
+                      <TableCell component="th" scope="row" align="right">
+                        {changeRatio
+                          ? (changeRatio * 100).toFixed(2) + "%"
+                          : ""}
+                      </TableCell>
+                      <TableCell component="th" scope="row" align="right">
+                        {volume ? numberWithCommas(volume) : ""}
+                      </TableCell>
+                      <TableCell align="right">
+                        {tickersFundamentals[symbol] ? (
+                          tickersFundamentals[symbol]["Shs Float"]
+                        ) : (
+                          <IconButton
+                            variant="contained"
+                            color="primary"
+                            onClick={() => getFundamentals(symbol)}
+                          >
+                            <GetAppIcon />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        {tickersFundamentals[symbol] ? (
+                          tickersFundamentals[symbol]["Insider Own"]
+                        ) : (
+                          <IconButton
+                            variant="contained"
+                            color="primary"
+                            onClick={() => getFundamentals(symbol)}
+                          >
+                            <GetAppIcon />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  )
+                )}
               </TableBody>
             </Table>
           </TableContainer>
@@ -453,6 +652,24 @@ const App = () => {
             </Table>
           </TableContainer>
         </div>
+      </div>
+      {/* Trades streaming */}
+      <div className={classes.streamingContainer}>
+        {tickersInWatchlist.map((ticker) => (
+          <div className={classes.streamingItem}>
+            <div>{ticker}</div>
+            <div className={classes.stream}>
+              <StackColumnChart
+                data={
+                  formattedTrades[ticker]?.formattedTradesByTimeAndPrice || []
+                }
+                segments={Object.keys(
+                  formattedTrades[ticker]?.formattedTradesByPrice || []
+                )}
+              />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

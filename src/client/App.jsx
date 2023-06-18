@@ -18,8 +18,10 @@ import { IconButton } from "@material-ui/core";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import MenuIcon from "@material-ui/icons/Menu";
 import NotificationWidget from "client/Pages/Home/Components/NotificationWidget";
+import AddNotificationAlert from "client/Pages/Home/Components/NotificationWidget/AddNotificationAlert";
 import logo from "client/images/logo.png";
 import "./app.scss";
+import TradeAnalysis from "./Pages/TradesAnalysis";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,18 +42,20 @@ const useStyles = makeStyles((theme) => ({
   },
   notificationContainer: {
     position: "absolute",
-    right: 0,
-    top: 45,
+    right: 25,
+    top: 75,
     visibility: "hidden",
     zIndex: 99,
+    display: "flex",
   },
   showNotifications: {
     visibility: "visible",
+    backgroundColor: "white",
   },
   appContainer: {
     height: "100%",
     backgroundColor: "#e9ecff",
-    overflow: "hidden",
+    overflow: "scroll",
   },
   linksContainer: {
     color: "black",
@@ -160,6 +164,13 @@ const App = () => {
                 </Link>
               </Button>
             </div>
+            <div>
+              <Button color="inherit">
+                <Link className={classes.link} to="/trades">
+                  Trades Analysis
+                </Link>
+              </Button>
+            </div>
           </div>
         </Drawer>
         <AppBar className={classes.appBar} position="static">
@@ -181,17 +192,17 @@ const App = () => {
               onClick={toggleNotifications}
             >
               <NotificationsIcon />
-
-              <div>
-                <div
-                  className={`${classes.notificationContainer} ${
-                    showNotifications ? classes.showNotifications : ""
-                  }`}
-                >
-                  <NotificationWidget />
-                </div>
-              </div>
             </IconButton>
+            <div>
+              <div
+                className={`${classes.notificationContainer} ${
+                  showNotifications ? classes.showNotifications : ""
+                }`}
+              >
+                <AddNotificationAlert />
+                <NotificationWidget />
+              </div>
+            </div>
           </Toolbar>
         </AppBar>
 
@@ -215,6 +226,9 @@ const App = () => {
           </Route>
           <Route path="/gap-ups">
             <Gapups />
+          </Route>
+          <Route path="/trades">
+            <TradeAnalysis />
           </Route>
           <Route path="/">
             <TickerHistory />

@@ -7,7 +7,7 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { getHighVolumeDailyBars } from "client/apis/historyApi";
+import { getHighVolumeDailyBars, getNews } from "client/apis/historyApi";
 import {
   getFundamentalsFinviz,
   getBamsecFilings,
@@ -170,6 +170,16 @@ const Widget = ({ onGapperItemClick }) => {
     }
   };
 
+  const getNewsForSymbol = (date, symbol) => {
+    getNews(date, symbol)
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((err) => {
+        console.log({ data: {} });
+      });
+  };
+
   const classes = useStyles();
 
   const {
@@ -256,9 +266,10 @@ const Widget = ({ onGapperItemClick }) => {
                     ? classes.redBG
                     : classes.greenBG
                 }`}
-                onClick={() =>
-                  onGapperItemClick(d.Timestamp.split("T")[0], ticker)
-                }
+                onClick={() => {
+                  onGapperItemClick(d.Timestamp.split("T")[0], ticker);
+                  getNewsForSymbol(d.Timestamp.split("T")[0], ticker);
+                }}
               >
                 <div className={classes.itemField}>
                   {d.Timestamp.split("T")[0]}

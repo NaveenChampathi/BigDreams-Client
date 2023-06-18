@@ -2,6 +2,7 @@ import React, { Component, useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
+import Checkbox from "@material-ui/core/Checkbox";
 
 import Chart from "client/Pages/Home/Components/Chart/index";
 import DailyChart from "client/Pages/Home/Components/Chart/DailyChart";
@@ -19,13 +20,14 @@ import { processIntradayData } from "client/Pages/intradayStats";
 import { getFundamentalsFinviz } from "client/apis/fundamentalsApi";
 import { getHighVolumeDailyBars } from "client/apis/historyApi";
 import { getNasdaqHaltedTickers } from "client/apis/haltsApi";
+import { updateTickerType } from "client/apis/historyApi";
 
 const useStyles = makeStyles({
   flexContainer: {
     display: "flex",
   },
   gapupContainer: {
-    width: 220,
+    width: 350,
     height: 625,
     overflowY: "auto",
     margin: "0px 12px",
@@ -39,6 +41,9 @@ const useStyles = makeStyles({
       backgroundColor: "#e2e7ff",
     },
   },
+  selectedRow: {
+    backgroundColor: "#e2e7ff",
+  },
   gapupSymbolContainer: {
     width: 100,
     flex: 1,
@@ -50,6 +55,11 @@ const useStyles = makeStyles({
   },
   gapupVolume: {
     color: "gray",
+  },
+  gapupTypesContainer: {
+    flex: 1,
+    display: "flex",
+    justifyContent: "flex-end",
   },
   intradayChartContainer: {
     height: 650,
@@ -100,6 +110,9 @@ const useStyles = makeStyles({
     cursor: "pointer",
     backgroundColor: "#3f51b5",
     color: "white",
+  },
+  checkboxRoot: {
+    padding: 0,
   },
 });
 
@@ -159,6 +172,7 @@ const Gapups = () => {
   const [date, setDate] = useState(null);
   const [ticker, setTicker] = useState(null);
   const [gapups, setGapups] = useState([]);
+  const [gapupsPage, setGapupsPage] = useState(1);
   const [marketOpenGapups, setMarketOpenGapups] = useState([]);
   const [multiDayTickers, setMultiDayTickers] = useState([]);
   const [intradayStats, setIntradayStats] = useState({});
@@ -168,10 +182,12 @@ const Gapups = () => {
   const [selectedType, setSelectedType] = useState("gapUp");
   const [page, setPage] = useState(1);
   const [haltResumeTickers, setHaltResumeTickers] = useState([]);
+  const [selectedRow, setSelectedRow] = useState(0);
 
-  const onGapperItemClick = (_date, _ticker) => {
+  const onGapperItemClick = (_date, _ticker, _id) => {
     setDate(_date);
     setTicker(_ticker);
+    setSelectedRow(_id);
 
     getIntradayBars(_date, _ticker, 1, 0, 0).then((data) => {
       setIntradayStats(processIntradayData(data));
@@ -189,10 +205,14 @@ const Gapups = () => {
       const { averageData } = processData(data);
       setAverageData(averageData);
     });
+
+    // if (_id) {
+    //   se;
+    // }
   };
 
   useEffect(() => {
-    getAllGappedTickers().then(({ results }) =>
+    getAllGappedTickers(gapupsPage).then(({ results }) =>
       setGapups(
         results.sort((a, b) => new Date(b.TimeStamp) - new Date(a.TimeStamp))
       )
@@ -242,7 +262,16 @@ const Gapups = () => {
     if (!haltResumeTickers.length) {
       getHaltedTickers().then(({ results }) =>
         setHaltResumeTickers(
-          results.sort((a, b) => new Date(b.TimeStamp) - new Date(a.TimeStamp))
+          results
+            .sort((a, b) => new Date(b.TimeStamp) - new Date(a.TimeStamp))
+            .map((r) => {
+              const [month, day, year] = r.haltDate.split("/");
+
+              return {
+                ...r,
+                haltDate: `${year}-${month}-${day}`,
+              };
+            })
         )
       );
     }
@@ -280,6 +309,30 @@ const Gapups = () => {
       });
       return _page + 1;
     });
+  };
+
+  const loadNextGapupTickers = () => {
+    setGapupsPage((_page) => {
+      getAllGappedTickers(_page + 1).then(({ results: tickers }) => {
+        setGapups((_tickers) => [..._tickers, ...tickers]);
+      });
+      return _page + 1;
+    });
+  };
+
+  const updateTicker = (e, id, type, typeValue) => {
+    e.stopPropagation();
+    updateTickerType(id, type, typeValue);
+
+    setGapups((_tickers) =>
+      _tickers.map((t) => {
+        if (t._id === id) {
+          t[type] = typeValue;
+        }
+
+        return t;
+      })
+    );
   };
 
   return (
@@ -332,27 +385,75 @@ const Gapups = () => {
         {selectedType === "gapUp" && (
           <div>
             <div className={classes.gapupContainer}>
-              {gapups.map(({ Symbol, gapUp, Volume, TimeStamp }) => (
-                <div
-                  onClick={() =>
-                    onGapperItemClick(TimeStamp.split("T")[0], Symbol)
-                  }
-                  className={classes.gapupItemContainer}
-                >
-                  <div>
-                    <div className={classes.gapupSymbolContainer}>{Symbol}</div>
-                    <div className={classes.gapupDate}>
-                      {TimeStamp.split("T")[0]}
+              {gapups.map(
+                ({
+                  Symbol,
+                  gapUp,
+                  Volume,
+                  TimeStamp,
+                  _id,
+                  validGapupType1,
+                  validGapupType2,
+                }) => (
+                  <div
+                    onClick={() =>
+                      onGapperItemClick(TimeStamp.split("T")[0], Symbol, _id)
+                    }
+                    className={`${classes.gapupItemContainer} ${
+                      selectedRow === _id ? classes.selectedRow : ""
+                    }`}
+                  >
+                    <div>
+                      <div className={classes.gapupSymbolContainer}>
+                        {Symbol}
+                      </div>
+                      <div className={classes.gapupDate}>
+                        {TimeStamp.split("T")[0]}
+                      </div>
+                    </div>
+                    <div>
+                      <div className={classes.gapupPercentage}>{gapUp}</div>
+                      <div className={classes.gapupVolume}>
+                        {numberWithCommas(Volume)}
+                      </div>
+                    </div>
+                    <div className={classes.gapupTypesContainer}>
+                      <Checkbox
+                        classes={{
+                          root: classes.checkboxRoot,
+                        }}
+                        checked={validGapupType1}
+                        onChange={(e) =>
+                          updateTicker(
+                            e,
+                            _id,
+                            "validGapupType1",
+                            !validGapupType1
+                          )
+                        }
+                      />
+                      <Checkbox
+                        classes={{
+                          root: classes.checkboxRoot,
+                        }}
+                        color="primary"
+                        checked={validGapupType2}
+                        onChange={(e) =>
+                          updateTicker(
+                            e,
+                            _id,
+                            "validGapupType2",
+                            !validGapupType2
+                          )
+                        }
+                      />
                     </div>
                   </div>
-                  <div>
-                    <div className={classes.gapupPercentage}>{gapUp}</div>
-                    <div className={classes.gapupVolume}>
-                      {numberWithCommas(Volume)}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                )
+              )}
+              <div onClick={loadNextGapupTickers} className={classes.loadMore}>
+                Load More
+              </div>
             </div>
             <div>Total: {gapups.length}</div>
           </div>

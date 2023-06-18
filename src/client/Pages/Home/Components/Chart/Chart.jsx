@@ -407,8 +407,14 @@ class StockChart extends React.Component {
         xAccessor={xAccessor}
         xExtents={xExtents}
         zoomAnchor={lastVisibleItemBasedZoomAnchor}
+        text={"fsdaf"}
       >
-        <Chart id={3} height={chartHeight} yExtents={this.candleChartExtents}>
+        <Chart
+          id={3}
+          height={chartHeight}
+          yExtents={this.candleChartExtents}
+          text={"fsdaf"}
+        >
           <XAxis showGridLines gridLinesStrokeStyle="#e0e3eb" />
           <YAxis showGridLines tickFormat={this.pricesDisplayFormat} />
           <CandlestickSeries />
